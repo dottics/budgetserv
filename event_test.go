@@ -151,7 +151,7 @@ func TestService_GetEvents(t *testing.T) {
 		},
 	}
 
-	s := NewService("")
+	s := NewService(Config{})
 	ms := microtest.MockServer(s)
 	defer ms.Server.Close()
 
@@ -205,26 +205,26 @@ func TestService_GetEvents(t *testing.T) {
 func TestService_CreateEvent(t *testing.T) {
 	type E struct {
 		event Event
-		e dutil.Error
+		e     dutil.Error
 	}
 	tt := []struct {
-		name string
-		UUID uuid.UUID
-		event Event
+		name     string
+		UUID     uuid.UUID
+		event    Event
 		exchange *microtest.Exchange
-		E E
+		E        E
 	}{
 		{
 			name: "403 Permission Required",
 			UUID: uuid.MustParse("ae9f5130-81fe-4526-9573-f7e892cc2e01"),
 			event: Event{
-				Name: "test event one",
-				Amount: 12.19,
-				Debit: true,
-				Credit: false,
+				Name:      "test event one",
+				Amount:    12.19,
+				Debit:     true,
+				Credit:    false,
 				StartDate: time.Date(2021, 11, 18, 0, 0, 0, 0, time.UTC),
-				EndDate: time.Date(2021, 11, 19, 0, 0, 0, 0, time.UTC),
-				Active: true,
+				EndDate:   time.Date(2021, 11, 19, 0, 0, 0, 0, time.UTC),
+				Active:    true,
 			},
 			exchange: &microtest.Exchange{
 				Response: microtest.Response{
@@ -252,13 +252,13 @@ func TestService_CreateEvent(t *testing.T) {
 			name: "500 Internal Server Error",
 			UUID: uuid.MustParse("ae9f5130-81fe-4526-9573-f7e892cc2e01"),
 			event: Event{
-				Name: "test event two",
-				Amount: 12.19,
-				Debit: true,
-				Credit: false,
+				Name:      "test event two",
+				Amount:    12.19,
+				Debit:     true,
+				Credit:    false,
 				StartDate: time.Date(2021, 11, 18, 0, 0, 0, 0, time.UTC),
-				EndDate: time.Date(2021, 11, 19, 0, 0, 0, 0, time.UTC),
-				Active: true,
+				EndDate:   time.Date(2021, 11, 19, 0, 0, 0, 0, time.UTC),
+				Active:    true,
 			},
 			exchange: &microtest.Exchange{
 				Response: microtest.Response{
@@ -286,13 +286,13 @@ func TestService_CreateEvent(t *testing.T) {
 			name: "200 Successful",
 			UUID: uuid.MustParse("ae9f5130-81fe-4526-9573-f7e892cc2e01"),
 			event: Event{
-				Name: "test event three",
-				Amount: 12.19,
-				Debit: true,
-				Credit: false,
+				Name:      "test event three",
+				Amount:    12.19,
+				Debit:     true,
+				Credit:    false,
 				StartDate: time.Date(2021, 11, 18, 0, 0, 0, 0, time.UTC),
-				EndDate: time.Date(2021, 11, 19, 0, 0, 0, 0, time.UTC),
-				Active: true,
+				EndDate:   time.Date(2021, 11, 19, 0, 0, 0, 0, time.UTC),
+				Active:    true,
 			},
 			exchange: &microtest.Exchange{
 				Response: microtest.Response{
@@ -317,21 +317,21 @@ func TestService_CreateEvent(t *testing.T) {
 			},
 			E: E{
 				event: Event{
-					UUID: uuid.MustParse("b86768ee-69de-4fb2-81eb-ab96d14e37ae"),
-					Name: "test event three",
-					Amount: 12.19,
-					Debit: true,
-					Credit: false,
+					UUID:      uuid.MustParse("b86768ee-69de-4fb2-81eb-ab96d14e37ae"),
+					Name:      "test event three",
+					Amount:    12.19,
+					Debit:     true,
+					Credit:    false,
 					StartDate: time.Date(2021, 11, 18, 0, 0, 0, 0, time.UTC),
-					EndDate: time.Date(2021, 11, 19, 0, 0, 0, 0, time.UTC),
-					Active: true,
+					EndDate:   time.Date(2021, 11, 19, 0, 0, 0, 0, time.UTC),
+					Active:    true,
 				},
 				e: nil,
 			},
 		},
 	}
 
-	s := NewService("")
+	s := NewService(Config{})
 	ms := microtest.MockServer(s)
 	defer ms.Server.Close()
 
@@ -364,24 +364,24 @@ func TestService_CreateEvent(t *testing.T) {
 func TestUpdateEvent(t *testing.T) {
 	type E struct {
 		event Event
-		e dutil.Error
+		e     dutil.Error
 	}
 	tt := []struct {
-		name string
-		event Event
+		name     string
+		event    Event
 		exchange *microtest.Exchange
-		E E
+		E        E
 	}{
 		{
 			name: "error",
 			event: Event{
-				UUID: uuid.MustParse("b86768ee-69de-4fb2-81eb-ab96d14e37ae"),
-				Name: "test event",
-				Debit: true,
-				Credit: false,
+				UUID:      uuid.MustParse("b86768ee-69de-4fb2-81eb-ab96d14e37ae"),
+				Name:      "test event",
+				Debit:     true,
+				Credit:    false,
 				StartDate: time.Date(2021, 11, 18, 0, 0, 0, 0, time.UTC),
-				EndDate: time.Date(2021, 11, 19, 0, 0, 0, 0, time.UTC),
-				Active: true,
+				EndDate:   time.Date(2021, 11, 19, 0, 0, 0, 0, time.UTC),
+				Active:    true,
 			},
 			exchange: &microtest.Exchange{
 				Response: microtest.Response{
@@ -408,14 +408,14 @@ func TestUpdateEvent(t *testing.T) {
 		{
 			name: "success",
 			event: Event{
-				UUID: uuid.MustParse("b86768ee-69de-4fb2-81eb-ab96d14e37ae"),
-				Name: "test event",
-				Debit: false,
-				Credit: true,
-				Amount: 125.67,
+				UUID:      uuid.MustParse("b86768ee-69de-4fb2-81eb-ab96d14e37ae"),
+				Name:      "test event",
+				Debit:     false,
+				Credit:    true,
+				Amount:    125.67,
 				StartDate: time.Date(2021, 11, 18, 0, 0, 0, 0, time.UTC),
-				EndDate: time.Date(2021, 11, 19, 0, 0, 0, 0, time.UTC),
-				Active: true,
+				EndDate:   time.Date(2021, 11, 19, 0, 0, 0, 0, time.UTC),
+				Active:    true,
 			},
 			exchange: &microtest.Exchange{
 				Response: microtest.Response{
@@ -440,21 +440,21 @@ func TestUpdateEvent(t *testing.T) {
 			},
 			E: E{
 				event: Event{
-					UUID: uuid.MustParse("b86768ee-69de-4fb2-81eb-ab96d14e37ae"),
-					Name: "test event",
-					Debit: false,
-					Credit: true,
-					Amount: 125.67,
+					UUID:      uuid.MustParse("b86768ee-69de-4fb2-81eb-ab96d14e37ae"),
+					Name:      "test event",
+					Debit:     false,
+					Credit:    true,
+					Amount:    125.67,
 					StartDate: time.Date(2021, 11, 18, 0, 0, 0, 0, time.UTC),
-					EndDate: time.Date(2021, 11, 19, 0, 0, 0, 0, time.UTC),
-					Active: true,
+					EndDate:   time.Date(2021, 11, 19, 0, 0, 0, 0, time.UTC),
+					Active:    true,
 				},
 				e: nil,
 			},
 		},
 	}
 
-	s := NewService("")
+	s := NewService(Config{})
 	ms := microtest.MockServer(s)
 	defer ms.Server.Close()
 
@@ -481,15 +481,15 @@ func TestUpdateEvent(t *testing.T) {
 }
 
 func TestService_DeleteEvent(t *testing.T) {
-	type E struct  {
-		e dutil.Error
+	type E struct {
+		e        dutil.Error
 		exReqURI string
 	}
 	tt := []struct {
-		name string
-		UUID uuid.UUID
+		name     string
+		UUID     uuid.UUID
 		exchange *microtest.Exchange
-		E E
+		E        E
 	}{
 		{
 			name: "403 Bad Request",
@@ -532,12 +532,12 @@ func TestService_DeleteEvent(t *testing.T) {
 			},
 			E: E{
 				exReqURI: "/event/-?uuid=2c7b7d76-c9e0-49f8-b585-166ac70dba6f",
-				e: nil,
+				e:        nil,
 			},
 		},
 	}
 
-	s := NewService("")
+	s := NewService(Config{})
 	ms := microtest.MockServer(s)
 	defer ms.Server.Close()
 

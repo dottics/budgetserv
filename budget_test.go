@@ -7,18 +7,17 @@ import (
 	"testing"
 )
 
-
 func TestService_GetBudgets(t *testing.T) {
 	type E struct {
 		status int
-		len int
-		e dutil.Error
+		len    int
+		e      dutil.Error
 	}
 
-	tt := []struct{
-		name string
+	tt := []struct {
+		name     string
 		exchange *microtest.Exchange
-		E E
+		E        E
 	}{
 		{
 			name: "403 Forbidden",
@@ -36,7 +35,7 @@ func TestService_GetBudgets(t *testing.T) {
 			},
 			E: E{
 				status: 403,
-				len: 0,
+				len:    0,
 				e: &dutil.Err{
 					Status: 403,
 					Errors: map[string][]string{
@@ -61,7 +60,7 @@ func TestService_GetBudgets(t *testing.T) {
 			},
 			E: E{
 				status: 500,
-				len: 0,
+				len:    0,
 				e: &dutil.Err{
 					Status: 500,
 					Errors: map[string][]string{
@@ -92,7 +91,7 @@ func TestService_GetBudgets(t *testing.T) {
 			},
 			E: E{
 				status: 500,
-				len: 0,
+				len:    0,
 				e: &dutil.Err{
 					Status: 500,
 					Errors: map[string][]string{
@@ -132,13 +131,13 @@ func TestService_GetBudgets(t *testing.T) {
 			},
 			E: E{
 				status: 200,
-				len: 2,
-				e: nil,
+				len:    2,
+				e:      nil,
 			},
 		},
 	}
 
-	s := NewService("")
+	s := NewService(Config{})
 	ms := microtest.MockServer(s)
 	defer ms.Server.Close()
 
@@ -168,14 +167,14 @@ func TestService_GetBudgets(t *testing.T) {
 func TestService_GetBudget(t *testing.T) {
 	type E struct {
 		budget Budget
-		e dutil.Error
+		e      dutil.Error
 	}
 
-	tt := []struct{
-		name string
-		uuid uuid.UUID
+	tt := []struct {
+		name     string
+		uuid     uuid.UUID
 		exchange *microtest.Exchange
-		E E
+		E        E
 	}{
 		{
 			name: "403 Forbidden",
@@ -306,17 +305,17 @@ func TestService_GetBudget(t *testing.T) {
 			},
 			E: E{
 				budget: Budget{
-					UUID: uuid.MustParse("f5fca9d0-e308-4ff2-be4e-aff22a4c2a78"),
+					UUID:     uuid.MustParse("f5fca9d0-e308-4ff2-be4e-aff22a4c2a78"),
 					UserUUID: uuid.MustParse("67b14c0f-b8ea-4f0f-bf07-cadc73cd74d9"),
-					Name: "test budget",
-					Active: true,
+					Name:     "test budget",
+					Active:   true,
 				},
 				e: nil,
 			},
 		},
 	}
 
-	s := NewService("")
+	s := NewService(Config{})
 	ms := microtest.MockServer(s)
 	defer ms.Server.Close()
 
