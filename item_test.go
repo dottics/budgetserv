@@ -9,15 +9,15 @@ import (
 
 func TestService_GetItems(t *testing.T) {
 	type E struct {
-		e dutil.Error
-		items Items
+		e        dutil.Error
+		items    Items
 		exReqURI string
 	}
-	tt := []struct{
-		name string
-		uuid uuid.UUID
+	tt := []struct {
+		name     string
+		uuid     uuid.UUID
 		exchange *microtest.Exchange
-		E E
+		E        E
 	}{
 		{
 			name: "403 Permission Required",
@@ -36,11 +36,11 @@ func TestService_GetItems(t *testing.T) {
 			},
 			E: E{
 				exReqURI: "/budget/group/-/item?uuid=a0e09cfc-414d-4b42-9661-333090390a16",
-				items: Items{},
+				items:    Items{},
 				e: &dutil.Err{
 					Status: 403,
 					Errors: map[string][]string{
-						"auth":{"Please ensure you have permission"},
+						"auth": {"Please ensure you have permission"},
 					},
 				},
 			},
@@ -62,11 +62,11 @@ func TestService_GetItems(t *testing.T) {
 			},
 			E: E{
 				exReqURI: "/budget/group/-/item?uuid=0db30884-59ab-4214-8ae1-d3a1a3ae81c9",
-				items: Items{},
+				items:    Items{},
 				e: &dutil.Err{
 					Status: 401,
 					Errors: map[string][]string{
-						"group":{"not found"},
+						"group": {"not found"},
 					},
 				},
 			},
@@ -86,8 +86,8 @@ func TestService_GetItems(t *testing.T) {
 			},
 			E: E{
 				exReqURI: "/budget/group/-/item?uuid=7fa5252e-faaf-4486-ba68-ca6d00c203cf",
-				items: Items{},
-				e: nil,
+				items:    Items{},
+				e:        nil,
 			},
 		},
 		{
@@ -125,18 +125,18 @@ func TestService_GetItems(t *testing.T) {
 				exReqURI: "/budget/group/-/item?uuid=4694620e-a67e-418e-8b41-44a2413a6450",
 				items: Items{
 					Item{
-						UUID: uuid.MustParse("d2b64e51-8b31-4cbd-be90-439ddb33c3b7"),
-						Name: "item one",
+						UUID:   uuid.MustParse("d2b64e51-8b31-4cbd-be90-439ddb33c3b7"),
+						Name:   "item one",
 						Active: true,
 					},
 					Item{
-						UUID: uuid.MustParse("c1d396ab-4e32-4d1e-9baf-48a10529cf80"),
-						Name: "item two",
+						UUID:   uuid.MustParse("c1d396ab-4e32-4d1e-9baf-48a10529cf80"),
+						Name:   "item two",
 						Active: true,
 					},
 					Item{
-						UUID: uuid.MustParse("8e5ec8c2-f89b-464f-ba66-06f9365ebb2b"),
-						Name: "item three",
+						UUID:   uuid.MustParse("8e5ec8c2-f89b-464f-ba66-06f9365ebb2b"),
+						Name:   "item three",
 						Active: true,
 					},
 				},
@@ -145,7 +145,7 @@ func TestService_GetItems(t *testing.T) {
 		},
 	}
 
-	s := NewService("")
+	s := NewService(Config{})
 	ms := microtest.MockServer(s)
 	defer ms.Server.Close()
 

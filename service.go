@@ -3,56 +3,41 @@ package budget
 import (
 	"encoding/json"
 	"github.com/dottics/dutil"
+	"github.com/johannesscr/micro/msp"
 	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"net/url"
-	"os"
 )
 
+// Service is the budget-microservice which is used to make requests to the
+// budget-service.
 type Service struct {
-	Header http.Header
-	URL    url.URL
+	//Header http.Header
+	//URL    url.URL
+	msp.Service
 }
 
-func NewService(token string) *Service {
+// Config is the configuration for the budget-microservice.
+type Config struct {
+	UserToken string
+	APIKey    string
+	Header    http.Header
+	Values    url.Values
+}
+
+func NewService(config Config) *Service {
 	s := &Service{
-		URL: url.URL{
-			Scheme: os.Getenv("BUDGET_SERVICE_SCHEME"),
-			Host:   os.Getenv("BUDGET_SERVICE_HOST"),
-		},
-		Header: make(http.Header),
+		Service: *msp.NewService(msp.Config{
+			Name:      "budget",
+			UserToken: config.UserToken,
+			APIKey:    config.APIKey,
+			Header:    config.Header,
+			Values:    config.Values,
+		}),
 	}
-	// default budget-micro-service headers
-	(*s).Header.Set("Content-Type", "application/json")
-	(*s).Header.Set("X-User-Token", token)
-
 	return s
-}
-
-// SetURL sets the URL for the budget-micro-service to point to the service.
-//
-// SetURL is also the function which makes the service a mock service
-// interface.
-func (s *Service) SetURL(scheme string, host string) {
-	s.URL.Scheme = scheme
-	s.URL.Host = host
-}
-
-// SetEnv is used for testing, when the dynamic micro-service is created
-// then SetEnv is used to dynamically set the env vars for the temporary
-// service.
-func (s *Service) SetEnv() error {
-	err := os.Setenv("BUDGET_SERVICE_SCHEME", s.URL.Scheme)
-	if err != nil {
-		return err
-	}
-	err = os.Setenv("BUDGET_SERVICE_HOST", s.URL.Host)
-	if err != nil {
-		return err
-	}
-	return nil
 }
 
 // NewRequest consistently maps and executes requests to the requirements

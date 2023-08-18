@@ -10,18 +10,18 @@ import (
 
 func TestService_GetGroups(t *testing.T) {
 	type E struct {
-		groups Groups
-		e dutil.Error
+		groups   Groups
+		e        dutil.Error
 		exReqURI string
 	}
-	tt := []struct{
-		name string
+	tt := []struct {
+		name       string
 		budgetUUID uuid.UUID
-		exchange *microtest.Exchange
-		E E
+		exchange   *microtest.Exchange
+		E          E
 	}{
 		{
-			name: "403 Permission Required",
+			name:       "403 Permission Required",
 			budgetUUID: uuid.MustParse("2520f807-915e-41f6-9557-84500e1aebcc"),
 			exchange: &microtest.Exchange{
 				Response: microtest.Response{
@@ -40,14 +40,14 @@ func TestService_GetGroups(t *testing.T) {
 				e: &dutil.Err{
 					Status: 403,
 					Errors: map[string][]string{
-						"auth":{"Please ensure you have permission"},
+						"auth": {"Please ensure you have permission"},
 					},
 				},
 				groups: Groups{},
 			},
 		},
 		{
-			name: "404 Not Found",
+			name:       "404 Not Found",
 			budgetUUID: uuid.MustParse("7cb47f06-0d96-494b-a847-a472e2c04d9d"),
 			exchange: &microtest.Exchange{
 				Response: microtest.Response{
@@ -73,7 +73,7 @@ func TestService_GetGroups(t *testing.T) {
 			},
 		},
 		{
-			name: "500 Unmarshal Error",
+			name:       "500 Unmarshal Error",
 			budgetUUID: uuid.MustParse("1a252f35-c84f-4937-9c5b-f5deb19b5b10"),
 			exchange: &microtest.Exchange{
 				Response: microtest.Response{
@@ -112,14 +112,14 @@ func TestService_GetGroups(t *testing.T) {
 				e: &dutil.Err{
 					Status: 500,
 					Errors: map[string][]string{
-						"unmarshal":{"invalid character '}' looking for beginning of object key string"},
+						"unmarshal": {"invalid character '}' looking for beginning of object key string"},
 					},
 				},
 				groups: Groups{},
 			},
 		},
 		{
-			name: "500 Internal Server Error",
+			name:       "500 Internal Server Error",
 			budgetUUID: uuid.MustParse("3a8113f2-af77-4430-a59e-519a8ad0819d"),
 			exchange: &microtest.Exchange{
 				Response: microtest.Response{
@@ -138,14 +138,14 @@ func TestService_GetGroups(t *testing.T) {
 				e: &dutil.Err{
 					Status: 500,
 					Errors: map[string][]string{
-						"internal_server_error":{"some unexpected error"},
+						"internal_server_error": {"some unexpected error"},
 					},
 				},
 				groups: Groups{},
 			},
 		},
 		{
-			name: "200 Successful",
+			name:       "200 Successful",
 			budgetUUID: uuid.MustParse("b440353e-cc26-449c-a470-e0e36a2919a6"),
 			exchange: &microtest.Exchange{
 				Response: microtest.Response{
@@ -187,28 +187,28 @@ func TestService_GetGroups(t *testing.T) {
 			},
 			E: E{
 				exReqURI: "/budget/-/group?uuid=b440353e-cc26-449c-a470-e0e36a2919a6",
-				e: nil,
+				e:        nil,
 				groups: Groups{
 					Group{
-						UUID: uuid.MustParse("52f2c725-2cdc-401a-abdd-66db5fd06789"),
-						Name: "income",
+						UUID:   uuid.MustParse("52f2c725-2cdc-401a-abdd-66db5fd06789"),
+						Name:   "income",
 						Active: true,
 						SubGroups: Groups{
 							Group{
-								UUID: uuid.MustParse("b8448a78-6417-4fe2-849c-024622bc6106"),
-								Name: "base salary",
+								UUID:   uuid.MustParse("b8448a78-6417-4fe2-849c-024622bc6106"),
+								Name:   "base salary",
 								Active: true,
 							},
 						},
 					},
 					Group{
-						UUID: uuid.MustParse("eea51d45-c9bd-45e2-bc80-010ecbb7a0d3"),
-						Name: "investments",
+						UUID:   uuid.MustParse("eea51d45-c9bd-45e2-bc80-010ecbb7a0d3"),
+						Name:   "investments",
 						Active: true,
 					},
 					Group{
-						UUID: uuid.MustParse("6be3df72-da3d-4a8c-bef6-d0b57120b80a"),
-						Name: "expenses",
+						UUID:   uuid.MustParse("6be3df72-da3d-4a8c-bef6-d0b57120b80a"),
+						Name:   "expenses",
 						Active: true,
 					},
 				},
@@ -216,7 +216,7 @@ func TestService_GetGroups(t *testing.T) {
 		},
 	}
 
-	s := NewService("")
+	s := NewService(Config{})
 	ms := microtest.MockServer(s)
 	defer ms.Server.Close()
 
