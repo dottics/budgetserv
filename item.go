@@ -1,36 +1,33 @@
 package budget
 
 import (
+	"fmt"
 	"github.com/dottics/dutil"
 	"github.com/google/uuid"
-	"net/url"
+	"github.com/johannesscr/micro/msp"
 )
 
 // GetItems retrieves all the group's items of the specific group. The group
 // is identified using the uuid parameter.
 //
 // uuid (uuid.UUID) for the group
-func (s *Service) GetItems(UUID uuid.UUID) (Items, dutil.Error) {
-	s.URL.Path = "/budget/group/-/item"
-	q := url.Values{
-		"uuid": {UUID.String()},
-	}
-	s.URL.RawQuery = q.Encode()
+func (s *Service) GetItems(GroupUUID uuid.UUID) (Items, dutil.Error) {
+	s.URL.Path = fmt.Sprintf("/group/%s/items", GroupUUID.String())
 
 	type data struct {
 		Items Items `json:"items"`
 	}
-	resp := struct{
-		Message string `json:"message"`
-		Data data `json:"data"`
-		Errors map[string][]string `json:"errors"`
+	resp := struct {
+		Message string              `json:"message"`
+		Data    data                `json:"data"`
+		Errors  map[string][]string `json:"errors"`
 	}{}
 
-	res, e := s.newRequest("GET", s.URL.String(), nil, nil)
+	res, e := s.DoRequest("GET", s.URL, nil, nil, nil)
 	if e != nil {
 		return nil, e
 	}
-	_, e = s.decode(res, &resp)
+	_, e = msp.Decode(res, &resp)
 	if e != nil {
 		return nil, e
 	}

@@ -1,75 +1,84 @@
 package budget
 
 import (
-	"github.com/dottics/dutil"
+	"fmt"
 	"github.com/google/uuid"
-	"net/url"
 )
 
-func (s *Service) GetBudgets() (Budgets, dutil.Error) {
-	s.URL.Path = "/budget"
+// GetBudgets retrieves all the budgets from the budget-microservice.
+func (s *Service) GetBudgets() (Budgets, error) {
+	s.URL.Path = "/budget/"
 
 	type data struct {
 		Budgets Budgets `json:"budgets"`
 	}
 
 	resp := struct {
-		Message string              `json:"message"`
-		Data    data                `json:"data"`
-		Errors  map[string][]string `json:"errors"`
+		Message string `json:"message"`
+		Data    data   `json:"data"`
 	}{}
 
-	res, e := s.newRequest("GET", s.URL.String(), nil, nil)
-	if e != nil {
-		return nil, e
-	}
-	_, e = s.decode(res, &resp)
+	res, e := s.DoRequest("GET", s.URL, nil, nil, nil)
 	if e != nil {
 		return nil, e
 	}
 
-	if res.StatusCode != 200 {
-		e := &dutil.Err{
-			Status: res.StatusCode,
-			Errors: resp.Errors,
-		}
-		return nil, e
+	err := marshalResponse(200, res, &resp)
+	if err != nil {
+		return nil, err
 	}
 
 	return resp.Data.Budgets, nil
 }
 
-func (s *Service) GetBudget(UUID uuid.UUID) (Budget, dutil.Error) {
-	s.URL.Path = "/budget/-"
-	q := url.Values{}
-	q.Add("uuid", UUID.String())
-	s.URL.RawQuery = q.Encode()
+// GetEntityBudgets retrieves all the budgets related to a specific entity. The
+// entity is identified using the uuid parameter.
+func (s *Service) GetEntityBudgets(EntityUUID uuid.UUID) (Budgets, error) {
+	s.URL.Path = fmt.Sprintf("/budget/entity/%s", EntityUUID.String())
+
+	type data struct {
+		Budgets Budgets `json:"budgets"`
+	}
+
+	resp := struct {
+		Message string `json:"message"`
+		Data    data   `json:"data"`
+	}{}
+
+	res, e := s.DoRequest("GET", s.URL, nil, nil, nil)
+	if e != nil {
+		return nil, e
+	}
+
+	err := marshalResponse(200, res, &resp)
+	if err != nil {
+		return nil, err
+	}
+
+	return resp.Data.Budgets, nil
+}
+
+// GetBudget retrieves a specific budget's data.
+func (s *Service) GetBudget(UUID uuid.UUID) (Budget, error) {
+	s.URL.Path = fmt.Sprintf("/budget/%s", UUID.String())
 
 	type data struct {
 		Budget Budget `json:"budget"`
 	}
 
 	resp := struct {
-		Message string              `json:"message"`
-		Data    data                `json:"data"`
-		Errors  map[string][]string `json:"errors"`
+		Message string `json:"message"`
+		Data    data   `json:"data"`
 	}{}
 
-	res, e := s.newRequest("GET", s.URL.String(), nil, nil)
-	if e != nil {
-		return Budget{}, e
-	}
-	_, e = s.decode(res, &resp)
+	res, e := s.DoRequest("GET", s.URL, nil, nil, nil)
 	if e != nil {
 		return Budget{}, e
 	}
 
-	if res.StatusCode != 200 {
-		e := &dutil.Err{
-			Status: res.StatusCode,
-			Errors: resp.Errors,
-		}
-		return Budget{}, e
+	err := marshalResponse(200, res, &resp)
+	if err != nil {
+		return Budget{}, err
 	}
 
 	return resp.Data.Budget, nil

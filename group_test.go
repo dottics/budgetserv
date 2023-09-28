@@ -190,26 +190,22 @@ func TestService_GetGroups(t *testing.T) {
 				e:        nil,
 				groups: Groups{
 					Group{
-						UUID:   uuid.MustParse("52f2c725-2cdc-401a-abdd-66db5fd06789"),
-						Name:   "income",
-						Active: true,
+						UUID: uuid.MustParse("52f2c725-2cdc-401a-abdd-66db5fd06789"),
+						Name: "income",
 						SubGroups: Groups{
 							Group{
-								UUID:   uuid.MustParse("b8448a78-6417-4fe2-849c-024622bc6106"),
-								Name:   "base salary",
-								Active: true,
+								UUID: uuid.MustParse("b8448a78-6417-4fe2-849c-024622bc6106"),
+								Name: "base salary",
 							},
 						},
 					},
 					Group{
-						UUID:   uuid.MustParse("eea51d45-c9bd-45e2-bc80-010ecbb7a0d3"),
-						Name:   "investments",
-						Active: true,
+						UUID: uuid.MustParse("eea51d45-c9bd-45e2-bc80-010ecbb7a0d3"),
+						Name: "investments",
 					},
 					Group{
-						UUID:   uuid.MustParse("6be3df72-da3d-4a8c-bef6-d0b57120b80a"),
-						Name:   "expenses",
-						Active: true,
+						UUID: uuid.MustParse("6be3df72-da3d-4a8c-bef6-d0b57120b80a"),
+						Name: "expenses",
 					},
 				},
 			},

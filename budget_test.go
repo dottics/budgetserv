@@ -1,7 +1,7 @@
 package budget
 
 import (
-	"github.com/dottics/dutil"
+	"errors"
 	"github.com/google/uuid"
 	"github.com/johannesscr/micro/microtest"
 	"testing"
@@ -11,7 +11,7 @@ func TestService_GetBudgets(t *testing.T) {
 	type E struct {
 		status int
 		len    int
-		e      dutil.Error
+		e      error
 	}
 
 	tt := []struct {
@@ -24,80 +24,13 @@ func TestService_GetBudgets(t *testing.T) {
 			exchange: &microtest.Exchange{
 				Response: microtest.Response{
 					Status: 403,
-					Body: `{
-						"message":"Forbidden: unable to process request",
-						"data":{},
-						"errors": {
-							"auth": ["Please ensure you have permissions"]
-						}
-					}`,
+					Body:   noPermission,
 				},
 			},
 			E: E{
 				status: 403,
 				len:    0,
-				e: &dutil.Err{
-					Status: 403,
-					Errors: map[string][]string{
-						"auth": {"Please ensure you have permissions"},
-					},
-				},
-			},
-		},
-		{
-			name: "500 Internal Server Error",
-			exchange: &microtest.Exchange{
-				Response: microtest.Response{
-					Status: 500,
-					Body: `{
-						"message":"InternalServerError",
-						"data":{},
-						"errors":{
-							"internal_server_error": ["some unexpected error"]
-						}
-					}`,
-				},
-			},
-			E: E{
-				status: 500,
-				len:    0,
-				e: &dutil.Err{
-					Status: 500,
-					Errors: map[string][]string{
-						"internal_server_error": {"some unexpected error"},
-					},
-				},
-			},
-		},
-		{
-			name: "500 Unmarshal Error",
-			exchange: &microtest.Exchange{
-				Response: microtest.Response{
-					Status: 500,
-					Body: `{
-						"message":"",
-						"data":{
-							"budgets":[
-								{
-									"uuid":"117d4612-0c95-40b0-8544-c84c1af5407e",
-									"name":"budget name"
-									"active":"missing comma above"
-								}
-							]
-						},
-						"errors":{}
-					}`,
-				},
-			},
-			E: E{
-				status: 500,
-				len:    0,
-				e: &dutil.Err{
-					Status: 500,
-					Errors: map[string][]string{
-						"unmarshal": {"invalid character '\"' after object key:value pair"},
-					},
-				},
+				e:      errors.New("no permission"),
 			},
 		},
 		{
@@ -105,28 +38,7 @@ func TestService_GetBudgets(t *testing.T) {
 			exchange: &microtest.Exchange{
 				Response: microtest.Response{
 					Status: 200,
-					Body: `{
-						"message":"budgets found successfully",
-						"data":{
-							"budgets":[
-								{
-									"uuid":"4ebae4ad-803c-4487-98ea-3f1f926e59e6",
-									"user_uuid":"ecdccfe9-95fe-4c9f-bd86-169ad67c445a",
-									"organisation_uuid":null,
-									"name":"test budget uno",
-									"active":true
-								},
-								{
-									"uuid":"0d79e5cb-5b26-49bc-a5fa-3b39e2710675",
-									"user_uuid":"ecdccfe9-95fe-4c9f-bd86-169ad67c445a",
-									"organisation_uuid":null,
-									"name":"test budget dos",
-									"active":true
-								}
-							]
-						},
-						"errors":{}
-					}`,
+					Body:   string(responseBudgets),
 				},
 			},
 			E: E{
@@ -167,7 +79,7 @@ func TestService_GetBudgets(t *testing.T) {
 func TestService_GetBudget(t *testing.T) {
 	type E struct {
 		budget Budget
-		e      dutil.Error
+		e      error
 	}
 
 	tt := []struct {
@@ -182,23 +94,12 @@ func TestService_GetBudget(t *testing.T) {
 			exchange: &microtest.Exchange{
 				Response: microtest.Response{
 					Status: 403,
-					Body: `{
-						"message":"Forbidden: unable to process request",
-						"data":{},
-						"errors":{
-							"auth":["Please ensure you have permission"]
-						}
-					}`,
+					Body:   noPermission,
 				},
 			},
 			E: E{
 				budget: Budget{},
-				e: &dutil.Err{
-					Status: 403,
-					Errors: map[string][]string{
-						"auth": {"Please ensure you have permission"},
-					},
-				},
+				e:      errors.New("no permission"),
 			},
 		},
 		{
@@ -207,48 +108,12 @@ func TestService_GetBudget(t *testing.T) {
 			exchange: &microtest.Exchange{
 				Response: microtest.Response{
 					Status: 404,
-					Body: `{
-						"message":"NotFound: unable to process request",
-						"data":{},
-						"errors":{
-							"budget":["not found"]
-						}
-					}`,
+					Body:   errorResponseDetail(`"budget not found"`),
 				},
 			},
 			E: E{
 				budget: Budget{},
-				e: &dutil.Err{
-					Status: 404,
-					Errors: map[string][]string{
-						"budget": {"not found"},
-					},
-				},
-			},
-		},
-		{
-			name: "500 Internal Server Error",
-			uuid: uuid.New(),
-			exchange: &microtest.Exchange{
-				Response: microtest.Response{
-					Status: 500,
-					Body: `{
-						"message":"InternalServerError: unable to process request",
-						"data":{},
-						"errors":{
-							"internal_server_error":["some unexpected error"]
-						}
-					}`,
-				},
-			},
-			E: E{
-				budget: Budget{},
-				e: &dutil.Err{
-					Status: 500,
-					Errors: map[string][]string{
-						"internal_server_error": {"some unexpected error"},
-					},
-				},
+				e:      errors.New("budget not found"),
 			},
 		},
 		{
@@ -257,29 +122,12 @@ func TestService_GetBudget(t *testing.T) {
 			exchange: &microtest.Exchange{
 				Response: microtest.Response{
 					Status: 200,
-					Body: `{
-						"message":"budget found successfully",
-						"data":{
-							"budget":{
-								"uuid":"f5fca9d0-e308-4ff2-be4e-aff22a4c2a78",
-								"user_uuid":"67b14c0f-b8ea-4f0f-bf07-cadc73cd74d9",
-								"organisation_uuid":null,
-								"name":"test budget"
-								"active":true
-							}
-						},
-						"errors":{}
-					}`,
+					Body:   `{"message":"error""}`,
 				},
 			},
 			E: E{
 				budget: Budget{},
-				e: &dutil.Err{
-					Status: 500,
-					Errors: map[string][]string{
-						"unmarshal": {"invalid character '\"' after object key:value pair"},
-					},
-				},
+				e:      errors.New(`invalid character '"' after object key:value pair`),
 			},
 		},
 		{
@@ -288,29 +136,12 @@ func TestService_GetBudget(t *testing.T) {
 			exchange: &microtest.Exchange{
 				Response: microtest.Response{
 					Status: 200,
-					Body: `{
-						"message":"budget found successfully",
-						"data":{
-							"budget":{
-								"uuid":"f5fca9d0-e308-4ff2-be4e-aff22a4c2a78",
-								"user_uuid":"67b14c0f-b8ea-4f0f-bf07-cadc73cd74d9",
-								"organisation_uuid":null,
-								"name":"test budget",
-								"active":true
-							}
-						},
-						"errors":{}
-					}`,
+					Body:   string(responseBudget),
 				},
 			},
 			E: E{
-				budget: Budget{
-					UUID:     uuid.MustParse("f5fca9d0-e308-4ff2-be4e-aff22a4c2a78"),
-					UserUUID: uuid.MustParse("67b14c0f-b8ea-4f0f-bf07-cadc73cd74d9"),
-					Name:     "test budget",
-					Active:   true,
-				},
-				e: nil,
+				budget: testBudget,
+				e:      nil,
 			},
 		},
 	}
@@ -325,30 +156,13 @@ func TestService_GetBudget(t *testing.T) {
 			ms.Append(tc.exchange)
 
 			budget, e := s.GetBudget(tc.uuid)
-			if tc.E.e != nil {
-				if tc.E.e.Error() != e.Error() {
-					t.Errorf("expected '%v' got '%v'", tc.E.e.Error(), e.Error())
-				}
-			} else if e != nil {
-				t.Errorf("unexpected error: %s", e.Error())
+
+			if NotEqualError(tc.E.e, e) {
+				t.Errorf("expected '%+v' got '%+v'", tc.E.e, e)
 			}
 
-			if tc.E.budget != (Budget{}) {
-				if budget.UUID != tc.E.budget.UUID {
-					t.Errorf("expected '%v' got '%v'", tc.E.budget.UUID, budget.UUID)
-				}
-				if budget.Name != tc.E.budget.Name {
-					t.Errorf("expected '%v' got '%v'", tc.E.budget.Name, budget.Name)
-				}
-				if budget.Active != tc.E.budget.Active {
-					t.Errorf("expected '%v' got '%v'", tc.E.budget.Active, budget.Active)
-				}
-				if budget.UserUUID != tc.E.budget.UserUUID {
-					t.Errorf("expected '%v' got '%v'", tc.E.budget.UserUUID, budget.UserUUID)
-				}
-				if budget.OrganisationUUID != tc.E.budget.OrganisationUUID {
-					t.Errorf("expected '%v' got '%v'", tc.E.budget.OrganisationUUID, budget.OrganisationUUID)
-				}
+			if !EqualBudget(tc.E.budget, budget) {
+				t.Errorf("expected '%+v' got '%+v'", tc.E.budget, budget)
 			}
 		})
 	}

@@ -1,48 +1,50 @@
 package budget
 
 import (
+	"fmt"
 	"github.com/dottics/dutil"
 	"github.com/google/uuid"
-	"net/url"
+	"github.com/johannesscr/micro/msp"
 )
 
-// GetEvents retrieves all the events from the budget-micro-service that are
-// related to an item.
-func (s *Service) GetEvents(UUID uuid.UUID) (Events, dutil.Error) {
-	s.URL.Path = "/budget/group/item/-/event"
-	q := url.Values{
-		"uuid": {UUID.String()},
-	}
-	s.URL.RawQuery = q.Encode()
-
-	type data struct {
-		Events Events `json:"events"`
-	}
-	resp := struct {
-		Message string              `json:"message"`
-		Data    data                `json:"data"`
-		Errors  map[string][]string `json:"errors"`
-	}{}
-
-	res, e := s.newRequest("GET", s.URL.String(), nil, nil)
-	if e != nil {
-		return nil, e
-	}
-	_, e = s.decode(res, &resp)
-	if e != nil {
-		return nil, e
-	}
-
-	if res.StatusCode != 200 {
-		e := &dutil.Err{
-			Status: res.StatusCode,
-			Errors: resp.Errors,
-		}
-		return nil, e
-	}
-
-	return resp.Data.Events, nil
-}
+// TODO: remove this: endpoint no longer exists
+//// GetEvents retrieves all the events from the budget-micro-service that are
+//// related to an item.
+//func (s *Service) GetEvents(UUID uuid.UUID) (Events, dutil.Error) {
+//	s.URL.Path = "/budget/group/item/-/event"
+//	q := url.Values{
+//		"uuid": {UUID.String()},
+//	}
+//	s.URL.RawQuery = q.Encode()
+//
+//	type data struct {
+//		Events Events `json:"events"`
+//	}
+//	resp := struct {
+//		Message string              `json:"message"`
+//		Data    data                `json:"data"`
+//		Errors  map[string][]string `json:"errors"`
+//	}{}
+//
+//	res, e := s.DoRequest("GET", s.URL, nil, nil, nil)
+//	if e != nil {
+//		return nil, e
+//	}
+//	_, e = msp.Decode(res, &resp)
+//	if e != nil {
+//		return nil, e
+//	}
+//
+//	if res.StatusCode != 200 {
+//		e := &dutil.Err{
+//			Status: res.StatusCode,
+//			Errors: resp.Errors,
+//		}
+//		return nil, e
+//	}
+//
+//	return resp.Data.Events, nil
+//}
 
 // CreateEvent makes the request to the budget-micro-service to create a new
 // event and associate that event with an item
@@ -61,7 +63,7 @@ func (s *Service) CreateEvent(UUID uuid.UUID, event Event) (Event, dutil.Error) 
 	if e != nil {
 		return Event{}, e
 	}
-	res, e := s.newRequest("POST", s.URL.String(), nil, payload)
+	res, e := s.DoRequest("POST", s.URL, nil, nil, payload)
 	if e != nil {
 		return Event{}, e
 	}
@@ -75,7 +77,7 @@ func (s *Service) CreateEvent(UUID uuid.UUID, event Event) (Event, dutil.Error) 
 		Errors  map[string][]string `json:"errors"`
 	}{}
 
-	_, e = s.decode(res, &resp)
+	_, e = msp.Decode(res, &resp)
 	if e != nil {
 		return Event{}, nil
 	}
@@ -92,13 +94,13 @@ func (s *Service) CreateEvent(UUID uuid.UUID, event Event) (Event, dutil.Error) 
 }
 
 func (s *Service) UpdateEvent(event Event) (Event, dutil.Error) {
-	s.URL.Path = "/event/-"
+	s.URL.Path = fmt.Sprintf("/event/%s", event.UUID.String())
 
 	payload, e := dutil.MarshalReader(event)
 	if e != nil {
 		return Event{}, e
 	}
-	res, e := s.newRequest("PUT", s.URL.String(), nil, payload)
+	res, e := s.DoRequest("PUT", s.URL, nil, nil, payload)
 	if e != nil {
 		return Event{}, nil
 	}
@@ -111,7 +113,7 @@ func (s *Service) UpdateEvent(event Event) (Event, dutil.Error) {
 		Data    data                `json:"data"`
 		Errors  map[string][]string `json:"errors"`
 	}{}
-	_, e = s.decode(res, &resp)
+	_, e = msp.Decode(res, &resp)
 	if e != nil {
 		return Event{}, e
 	}
@@ -128,13 +130,9 @@ func (s *Service) UpdateEvent(event Event) (Event, dutil.Error) {
 }
 
 func (s *Service) DeleteEvent(UUID uuid.UUID) dutil.Error {
-	s.URL.Path = "/event/-"
-	q := url.Values{
-		"uuid": {UUID.String()},
-	}
-	s.URL.RawQuery = q.Encode()
+	s.URL.Path = fmt.Sprintf("/event/%s", UUID.String())
 
-	res, e := s.newRequest("DELETE", s.URL.String(), nil, nil)
+	res, e := s.DoRequest("DELETE", s.URL, nil, nil, nil)
 	if e != nil {
 		return e
 	}
@@ -144,7 +142,7 @@ func (s *Service) DeleteEvent(UUID uuid.UUID) dutil.Error {
 		Data    map[string]string   `json:"data"`
 		Errors  map[string][]string `json:"errors"`
 	}{}
-	_, e = s.decode(res, &resp)
+	_, e = msp.Decode(res, &resp)
 	if e != nil {
 		return e
 	}

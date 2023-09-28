@@ -125,19 +125,16 @@ func TestService_GetItems(t *testing.T) {
 				exReqURI: "/budget/group/-/item?uuid=4694620e-a67e-418e-8b41-44a2413a6450",
 				items: Items{
 					Item{
-						UUID:   uuid.MustParse("d2b64e51-8b31-4cbd-be90-439ddb33c3b7"),
-						Name:   "item one",
-						Active: true,
+						UUID: uuid.MustParse("d2b64e51-8b31-4cbd-be90-439ddb33c3b7"),
+						Name: "item one",
 					},
 					Item{
-						UUID:   uuid.MustParse("c1d396ab-4e32-4d1e-9baf-48a10529cf80"),
-						Name:   "item two",
-						Active: true,
+						UUID: uuid.MustParse("c1d396ab-4e32-4d1e-9baf-48a10529cf80"),
+						Name: "item two",
 					},
 					Item{
-						UUID:   uuid.MustParse("8e5ec8c2-f89b-464f-ba66-06f9365ebb2b"),
-						Name:   "item three",
-						Active: true,
+						UUID: uuid.MustParse("8e5ec8c2-f89b-464f-ba66-06f9365ebb2b"),
+						Name: "item three",
 					},
 				},
 				e: nil,
@@ -175,9 +172,6 @@ func TestService_GetItems(t *testing.T) {
 				}
 				if item.Name != j.Name {
 					t.Errorf("expected name '%v' got '%v'", item.Name, j.Name)
-				}
-				if item.Active != j.Active {
-					t.Errorf("expected active '%v' got '%v'", item.Active, j.Active)
 				}
 			}
 
