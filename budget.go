@@ -83,3 +83,62 @@ func (s *Service) GetBudget(UUID uuid.UUID) (Budget, error) {
 
 	return resp.Data.Budget, nil
 }
+
+// CreateBudget to create a new budget for an entity.
+func (s *Service) CreateBudget(budget BudgetCreatePayload) (Budget, error) {
+	s.URL.Path = "/budget/"
+	p, err := marshalReader(budget)
+	if err != nil {
+		return Budget{}, nil
+	}
+
+	res, e := s.DoRequest("POST", s.URL, nil, nil, p)
+	if e != nil {
+		return Budget{}, nil
+	}
+
+	type data struct {
+		Budget Budget `json:"budget"`
+	}
+
+	resp := struct {
+		Message string `json:"message"`
+		Data    data   `json:"data"`
+	}{}
+
+	err = marshalResponse(201, res, &resp)
+	if err != nil {
+		return Budget{}, err
+	}
+
+	return resp.Data.Budget, nil
+}
+
+// UpdateBudget updates a budget's information
+func (s *Service) UpdateBudget(budget BudgetUpdatePayload) (Budget, error) {
+	s.URL.Path = fmt.Sprintf("/budget/%s", budget.UUID.String())
+	p, err := marshalReader(budget)
+	if err != nil {
+		return Budget{}, nil
+	}
+
+	res, e := s.DoRequest("PUT", s.URL, nil, nil, p)
+	if e != nil {
+		return Budget{}, nil
+	}
+
+	type data struct {
+		Budget Budget `json:"budget"`
+	}
+
+	resp := struct {
+		Data data `json:"data"`
+	}{}
+
+	err = marshalResponse(200, res, &resp)
+	if err != nil {
+		return Budget{}, err
+	}
+
+	return resp.Data.Budget, nil
+}

@@ -5,6 +5,19 @@ import (
 	"time"
 )
 
+type BudgetCreatePayload struct {
+	EntityUUID  uuid.UUID `json:"entity_uuid"`
+	Name        string    `json:"name"`
+	Description string    `json:"description"`
+}
+
+type BudgetUpdatePayload struct {
+	UUID        uuid.UUID `json:"uuid"`
+	EntityUUID  uuid.UUID `json:"entity_uuid"`
+	Name        string    `json:"name"`
+	Description string    `json:"description"`
+}
+
 type Budget struct {
 	UUID        uuid.UUID `json:"uuid"`
 	EntityUUID  uuid.UUID `json:"entity_uuid"`
@@ -15,6 +28,12 @@ type Budget struct {
 
 type Budgets []Budget
 
+type GroupPayload struct {
+	BudgetUUID  uuid.UUID `json:"budget_uuid"`
+	Name        string    `json:"name"`
+	Description string    `json:"description"`
+}
+
 type Group struct {
 	UUID        uuid.UUID `json:"uuid"`
 	Name        string    `json:"name"`
@@ -24,6 +43,12 @@ type Group struct {
 }
 
 type Groups []Group
+
+type ItemPayload struct {
+	GroupUUID   uuid.UUID `json:"group_uuid"`
+	Name        string    `json:"name"`
+	Description string    `json:"description"`
+}
 
 type Item struct {
 	UUID        uuid.UUID `json:"uuid"`
@@ -49,6 +74,17 @@ func (i Item) MonthlyTotal(year int) [12]float64 {
 }
 
 type Items []Item
+
+type EventPayload struct {
+	ItemUUID    uuid.UUID `json:"item_uuid"`
+	Name        string    `json:"name"`
+	Description string    `json:"description"`
+	Debit       bool      `json:"debit"`
+	Credit      bool      `json:"credit"`
+	Amount      float64   `json:"amount"`
+	StartDate   time.Time `json:"start_date"`
+	EndDate     time.Time `json:"end_date"`
+}
 
 type Event struct {
 	UUID        uuid.UUID `json:"uuid"`
