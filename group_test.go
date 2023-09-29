@@ -1,6 +1,7 @@
 package budget
 
 import (
+	"errors"
 	"fmt"
 	"github.com/dottics/dutil"
 	"github.com/google/uuid"
@@ -243,6 +244,87 @@ func TestService_GetGroups(t *testing.T) {
 			// test the exchange request URI
 			if tc.exchange.Request.RequestURI != tc.E.exReqURI {
 				t.Errorf("expected uri '%v' got '%v'", tc.E.exReqURI, tc.exchange.Request.RequestURI)
+			}
+		})
+	}
+}
+
+func TestService_GetGroup(t *testing.T) {
+	tt := []struct {
+		name      string
+		groupUUID uuid.UUID
+		exchange  *microtest.Exchange
+		uri       string
+		group     Group
+		e         error
+	}{
+		{
+			name:      "403 Permission Required",
+			groupUUID: uuid.MustParse("2520f807-915e-41f6-9557-84500e1aebcc"),
+			exchange: &microtest.Exchange{
+				Response: microtest.Response{
+					Status: 403,
+					Body:   noPermission,
+				},
+			},
+			uri:   "/group/2520f807-915e-41f6-9557-84500e1aebcc",
+			group: Group{},
+			e:     errors.New("no permission"),
+		},
+		{
+			name:      "404 Not Found",
+			groupUUID: uuid.MustParse("7cb47f06-0d96-494b-a847-a472e2c04d9d"),
+			exchange: &microtest.Exchange{
+				Response: microtest.Response{
+					Status: 404,
+					Body:   notFound,
+				},
+			},
+			uri:   "/group/7cb47f06-0d96-494b-a847-a472e2c04d9d",
+			group: Group{},
+			e:     errors.New("not found"),
+		},
+		{
+			name:      "200 Successful",
+			groupUUID: uuid.MustParse("b440353e-cc26-449c-a470-e0e36a2919a6"),
+			exchange: &microtest.Exchange{
+				Response: microtest.Response{
+					Status: 200,
+					Body:   string(responseGroup),
+				},
+			},
+			uri:   "/group/b440353e-cc26-449c-a470-e0e36a2919a6",
+			group: testGroup,
+			e:     nil,
+		},
+	}
+
+	s := NewService(Config{})
+	ms := microtest.MockServer(s)
+	defer ms.Server.Close()
+
+	for _, tc := range tt {
+		t.Run(tc.name, func(t *testing.T) {
+			// add the budget-micro-service exchange
+			ms.Append(tc.exchange)
+
+			xg, e := s.GetGroup(tc.groupUUID)
+			// test the error response
+			if tc.e != nil {
+				if tc.e.Error() != e.Error() {
+					t.Errorf("expected error '%v' got '%v'", tc.e.Error(), e.Error())
+				}
+			} else if e != nil {
+				t.Errorf("unexpected error: %s", e.Error())
+			}
+
+			// test the group structure returned
+			if EqualGroup(xg, tc.group) == false {
+				t.Errorf("expected group\n'%+v'\ngot\n'%+v'", tc.group, xg)
+			}
+			// test the exchange request URI
+			if tc.exchange.Request.RequestURI != tc.uri {
+				t.Errorf("expected uri '%v' got '%v'", tc.uri, tc.exchange.Request.RequestURI)
 			}
 		})
 	}

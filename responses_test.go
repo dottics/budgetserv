@@ -21,8 +21,8 @@ var noPermission = `{
 	"detail": "No permission"
 }`
 
-var noAuth = `{
-	"detail": "No token"
+var notFound = `{
+	"detail": "Not found"
 }`
 
 func errorResponseDetail(s string) string {
@@ -171,4 +171,55 @@ var responseBudgets = json.RawMessage(`{
 		    }
 		]
 	}	
+}`)
+
+var testGroup = Group{
+	UUID:      uuid.MustParse("52f2c725-2cdc-401a-abdd-66db5fd06789"),
+	Name:      "income",
+	SubGroups: Groups{},
+	Items: Items{
+		{
+			UUID: uuid.MustParse("2bd06946-c355-4198-8766-949149331e04"),
+			Name: "salary",
+			Events: Events{
+				{
+					UUID:      uuid.MustParse("c130f4d9-0124-4f0c-8129-298ae60cd9f1"),
+					Name:      "work salary",
+					Amount:    30000,
+					Debit:     true,
+					Credit:    false,
+					StartDate: time.Date(2023, 1, 25, 0, 0, 0, 0, time.UTC),
+					EndDate:   time.Date(2023, 12, 20, 0, 0, 0, 0, time.UTC),
+				},
+			},
+		},
+	},
+}
+
+var responseGroup = json.RawMessage(`{
+	"message": "group retrieved",
+	"data": {
+		"group": {
+			"uuid": "52f2c725-2cdc-401a-abdd-66db5fd06789",
+			"name": "income",
+			"sub_groups": [],
+			"items": [
+				{
+					"uuid": "2bd06946-c355-4198-8766-949149331e04",
+					"name": "salary",
+					"events": [
+						{
+							"uuid": "c130f4d9-0124-4f0c-8129-298ae60cd9f1",
+							"name": "work salary",
+							"amount": 30000,
+							"debit": true,
+							"credit": false,
+							"start_date": "2023-01-25T00:00:00Z",
+							"end_date": "2023-12-20T00:00:00Z"
+						}
+					]
+				}
+			]
+		}
+	}
 }`)

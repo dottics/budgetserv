@@ -42,3 +42,29 @@ func (s *Service) GetGroups(BudgetUUID uuid.UUID) (Groups, dutil.Error) {
 	}
 	return resp.Data.Groups, nil
 }
+
+// GetGroup retrieves a specific group. The group is identified using the uuid
+// parameter.
+func (s *Service) GetGroup(UUID uuid.UUID) (Group, error) {
+	s.URL.Path = fmt.Sprintf("/group/%s", UUID.String())
+
+	res, e := s.DoRequest("GET", s.URL, nil, nil, nil)
+	if e != nil {
+		return Group{}, e
+	}
+
+	type data struct {
+		Group Group `json:"group"`
+	}
+
+	resp := struct {
+		Message string `json:"message"`
+		Data    data   `json:"data"`
+	}{}
+
+	err := marshalResponse(200, res, &resp)
+	if err != nil {
+		return Group{}, err
+	}
+	return resp.Data.Group, nil
+}
