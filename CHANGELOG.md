@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - The `CreateBudget` method to be able to create a new budget.
 - The `UpdateBudget` method to be able to update a budget.
+- The `GetGroup` method to be able to get a specific group.
 
 ## [0.1.0] - 2023-08-18
 ### Added
