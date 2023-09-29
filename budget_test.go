@@ -144,6 +144,20 @@ func TestService_GetBudget(t *testing.T) {
 				e:      nil,
 			},
 		},
+		{
+			name: "200 Successful with Groups",
+			uuid: uuid.New(),
+			exchange: &microtest.Exchange{
+				Response: microtest.Response{
+					Status: 200,
+					Body:   string(responseBudgetWithGroups),
+				},
+			},
+			E: E{
+				budget: testBudgetWithGroups,
+				e:      nil,
+			},
+		},
 	}
 
 	s := NewService(Config{})
@@ -162,7 +176,7 @@ func TestService_GetBudget(t *testing.T) {
 			}
 
 			if !EqualBudget(tc.E.budget, budget) {
-				t.Errorf("expected '%+v' got '%+v'", tc.E.budget, budget)
+				t.Errorf("expected\n'%+v'\ngot\n'%+v'", tc.E.budget, budget)
 			}
 		})
 	}

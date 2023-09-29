@@ -36,7 +36,7 @@ func TestService_GetGroups(t *testing.T) {
 				},
 			},
 			E: E{
-				exReqURI: "/budget/-/group?uuid=2520f807-915e-41f6-9557-84500e1aebcc",
+				exReqURI: "/budget/2520f807-915e-41f6-9557-84500e1aebcc/groups",
 				e: &dutil.Err{
 					Status: 403,
 					Errors: map[string][]string{
@@ -62,7 +62,7 @@ func TestService_GetGroups(t *testing.T) {
 				},
 			},
 			E: E{
-				exReqURI: "/budget/-/group?uuid=7cb47f06-0d96-494b-a847-a472e2c04d9d",
+				exReqURI: "/budget/7cb47f06-0d96-494b-a847-a472e2c04d9d/groups",
 				e: &dutil.Err{
 					Status: 404,
 					Errors: map[string][]string{
@@ -108,7 +108,7 @@ func TestService_GetGroups(t *testing.T) {
 				},
 			},
 			E: E{
-				exReqURI: "/budget/-/group?uuid=1a252f35-c84f-4937-9c5b-f5deb19b5b10",
+				exReqURI: "/budget/1a252f35-c84f-4937-9c5b-f5deb19b5b10/groups",
 				e: &dutil.Err{
 					Status: 500,
 					Errors: map[string][]string{
@@ -134,7 +134,7 @@ func TestService_GetGroups(t *testing.T) {
 				},
 			},
 			E: E{
-				exReqURI: "/budget/-/group?uuid=3a8113f2-af77-4430-a59e-519a8ad0819d",
+				exReqURI: "/budget/3a8113f2-af77-4430-a59e-519a8ad0819d/groups",
 				e: &dutil.Err{
 					Status: 500,
 					Errors: map[string][]string{
@@ -186,7 +186,7 @@ func TestService_GetGroups(t *testing.T) {
 				},
 			},
 			E: E{
-				exReqURI: "/budget/-/group?uuid=b440353e-cc26-449c-a470-e0e36a2919a6",
+				exReqURI: "/budget/b440353e-cc26-449c-a470-e0e36a2919a6/groups",
 				e:        nil,
 				groups: Groups{
 					Group{

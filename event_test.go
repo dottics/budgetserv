@@ -9,195 +9,6 @@ import (
 	"time"
 )
 
-// TODO: remove
-//func TestService_GetEvents(t *testing.T) {
-//	type E struct {
-//		exReqURI string
-//		events   Events
-//		e        dutil.Error
-//	}
-//	tt := []struct {
-//		name     string
-//		uuid     uuid.UUID
-//		exchange *microtest.Exchange
-//		E        E
-//	}{
-//		{
-//			name: "403 Permission Required",
-//			uuid: uuid.MustParse("9db1590a-9f77-47af-baa6-0a786095e510"),
-//			exchange: &microtest.Exchange{
-//				Response: microtest.Response{
-//					Status: 403,
-//					Body: `{
-//						"message":"Forbidden: unable to process request",
-//						"data":{},
-//						"errors":{
-//							"auth":["Please ensure you have permission"]
-//						}
-//					}`,
-//				},
-//			},
-//			E: E{
-//				exReqURI: "/budget/group/item/-/event?uuid=9db1590a-9f77-47af-baa6-0a786095e510",
-//				events:   Events{},
-//				e: &dutil.Err{
-//					Status: 403,
-//					Errors: map[string][]string{
-//						"auth": {"Please ensure you have permission"},
-//					},
-//				},
-//			},
-//		},
-//		{
-//			name: "500 Internal Server Error",
-//			uuid: uuid.MustParse("08aa5301-2285-4f2f-b930-677683468e0f"),
-//			exchange: &microtest.Exchange{
-//				Response: microtest.Response{
-//					Status: 500,
-//					Body: `{
-//						"message":"InternalServerError: unable to process request",
-//						"data":{},
-//						"errors":{
-//							"internal_server_error":["some internal server error"]
-//						}
-//					}`,
-//				},
-//			},
-//			E: E{
-//				exReqURI: "/budget/group/item/-/event?uuid=08aa5301-2285-4f2f-b930-677683468e0f",
-//				events:   Events{},
-//				e: &dutil.Err{
-//					Status: 500,
-//					Errors: map[string][]string{
-//						"internal_server_error": {"some internal server error"},
-//					},
-//				},
-//			},
-//		},
-//		{
-//			name: "200 Successful Events",
-//			uuid: uuid.MustParse("bf905480-9c0f-42d3-85c0-cc98dd63be5c"),
-//			exchange: &microtest.Exchange{
-//				Response: microtest.Response{
-//					Status: 200,
-//					Body: `{
-//						"message":"events found successfully",
-//						"data":{
-//							"events":[
-//								{
-//									"uuid":"d89b8fc2-9e64-4706-a4db-17ffbe6d16a9",
-//									"name":"event one",
-//									"debit":true,
-//									"credit":false,
-//									"amount":1205.24,
-//									"start_date":"2021-11-12T00:00:00Z",
-//									"end_date":"2021-11-12T00:00:00Z",
-//									"active":true
-//								},
-//								{
-//									"uuid":"6aa6d86e-8bcc-4706-a2d1-82bbfc7e7c97",
-//									"name":"event two",
-//									"debit":true,
-//									"credit":false,
-//									"amount":178,
-//									"start_date":"2021-11-12T00:00:00Z",
-//									"end_date":"2021-11-12T00:00:00Z",
-//									"active":true
-//								},
-//								{
-//									"uuid":"603f9589-ecb3-437a-9406-1652eb5a38eb",
-//									"name":"event three",
-//									"debit":false,
-//									"credit":true,
-//									"amount":0.35,
-//									"start_date":"2021-11-12T00:00:00Z",
-//									"end_date":"2021-11-12T00:00:00Z",
-//									"active":true
-//								}
-//							]
-//						},
-//						"errors":{}
-//					}`,
-//				},
-//			},
-//			E: E{
-//				exReqURI: "/budget/group/item/-/event?uuid=bf905480-9c0f-42d3-85c0-cc98dd63be5c",
-//				events: Events{
-//					Event{
-//						UUID:   uuid.MustParse("d89b8fc2-9e64-4706-a4db-17ffbe6d16a9"),
-//						Name:   "event one",
-//						Debit:  true,
-//						Credit: false,
-//						Amount: 1205.24,
-//					},
-//					Event{
-//						UUID:   uuid.MustParse("6aa6d86e-8bcc-4706-a2d1-82bbfc7e7c97"),
-//						Name:   "event two",
-//						Debit:  true,
-//						Credit: false,
-//						Amount: 178,
-//					},
-//					Event{
-//						UUID:   uuid.MustParse("603f9589-ecb3-437a-9406-1652eb5a38eb"),
-//						Name:   "event three",
-//						Debit:  false,
-//						Credit: true,
-//						Amount: 0.35,
-//					},
-//				},
-//				e: nil,
-//			},
-//		},
-//	}
-//
-//	s := NewService(Config{})
-//	ms := microtest.MockServer(s)
-//	defer ms.Server.Close()
-//
-//	for _, tc := range tt {
-//		t.Run(tc.name, func(t *testing.T) {
-//			// add budget-micro-service exchange
-//			ms.Append(tc.exchange)
-//
-//			xe, e := s.GetEvents(tc.uuid)
-//			// test errors
-//			if tc.E.e != nil {
-//				if tc.E.e.Error() != e.Error() {
-//					t.Errorf("expected error '%v' got '%v'", tc.E.e.Error(), e.Error())
-//				}
-//			} else if e != nil {
-//				t.Errorf("unexpected error: %s", e.Error())
-//			}
-//			// test events
-//			if len(tc.E.events) != len(xe) {
-//				t.Errorf("expected events length %d got %d", len(tc.E.events), len(xe))
-//			}
-//			for i, event := range tc.E.events {
-//				ev := xe[i]
-//				if ev.UUID != event.UUID {
-//					t.Errorf("expected event uuid '%v' got '%v'", event.UUID, ev.UUID)
-//				}
-//				if ev.Name != event.Name {
-//					t.Errorf("expected event name '%v' got '%v'", event.Name, ev.Name)
-//				}
-//				if ev.Debit != event.Debit {
-//					t.Errorf("expected event debit '%v' got '%v'", event.Debit, ev.Debit)
-//				}
-//				if ev.Credit != event.Credit {
-//					t.Errorf("expected event credit '%v' got '%v'", event.Credit, ev.Credit)
-//				}
-//				if ev.Amount != event.Amount {
-//					t.Errorf("expected event credit %f got %f", event.Amount, ev.Amount)
-//				}
-//			}
-//			// test query string
-//			if tc.exchange.Request.RequestURI != tc.E.exReqURI {
-//				t.Errorf("expected exchange request URI '%s' got '%s'", tc.E.exReqURI, tc.exchange.Request.RequestURI)
-//			}
-//		})
-//	}
-//}
-
 func TestService_CreateEvent(t *testing.T) {
 	type E struct {
 		event Event
@@ -206,14 +17,14 @@ func TestService_CreateEvent(t *testing.T) {
 	tt := []struct {
 		name     string
 		UUID     uuid.UUID
-		event    Event
+		event    EventCreate
 		exchange *microtest.Exchange
 		E        E
 	}{
 		{
 			name: "403 Permission Required",
 			UUID: uuid.MustParse("ae9f5130-81fe-4526-9573-f7e892cc2e01"),
-			event: Event{
+			event: EventCreate{
 				Name:      "test event one",
 				Amount:    12.19,
 				Debit:     true,
@@ -246,7 +57,7 @@ func TestService_CreateEvent(t *testing.T) {
 		{
 			name: "500 Internal Server Error",
 			UUID: uuid.MustParse("ae9f5130-81fe-4526-9573-f7e892cc2e01"),
-			event: Event{
+			event: EventCreate{
 				Name:      "test event two",
 				Amount:    12.19,
 				Debit:     true,
@@ -279,7 +90,7 @@ func TestService_CreateEvent(t *testing.T) {
 		{
 			name: "200 Successful",
 			UUID: uuid.MustParse("ae9f5130-81fe-4526-9573-f7e892cc2e01"),
-			event: Event{
+			event: EventCreate{
 				Name:      "test event three",
 				Amount:    12.19,
 				Debit:     true,
@@ -332,7 +143,7 @@ func TestService_CreateEvent(t *testing.T) {
 			// add budget-micro-service exchange
 			ms.Append(tc.exchange)
 
-			ev, e := s.CreateEvent(tc.UUID, tc.event)
+			ev, e := s.CreateEvent(tc.event)
 
 			// test errors
 			if tc.E.e != nil {
@@ -356,18 +167,19 @@ func TestService_CreateEvent(t *testing.T) {
 func TestUpdateEvent(t *testing.T) {
 	type E struct {
 		event Event
-		e     dutil.Error
+		e     error
 	}
 	tt := []struct {
 		name     string
-		event    Event
+		uuid     uuid.UUID
+		event    EventUpdate
 		exchange *microtest.Exchange
 		E        E
 	}{
 		{
 			name: "error",
-			event: Event{
-				UUID:      uuid.MustParse("b86768ee-69de-4fb2-81eb-ab96d14e37ae"),
+			event: EventUpdate{
+				ItemUUID:  uuid.MustParse("b86768ee-69de-4fb2-81eb-ab96d14e37ae"),
 				Name:      "test event",
 				Debit:     true,
 				Credit:    false,
@@ -377,29 +189,18 @@ func TestUpdateEvent(t *testing.T) {
 			exchange: &microtest.Exchange{
 				Response: microtest.Response{
 					Status: 403,
-					Body: `{
-						"message":"Forbidden: unable to process request",
-						"data":{},
-						"errors":{
-							"permission":["Please ensure you have permission"]
-						}
-					}`,
+					Body:   noPermission,
 				},
 			},
 			E: E{
 				event: Event{},
-				e: &dutil.Err{
-					Status: 403,
-					Errors: map[string][]string{
-						"permission": {"Please ensure you have permission"},
-					},
-				},
+				e:     errors.New("no permission"),
 			},
 		},
 		{
 			name: "success",
-			event: Event{
-				UUID:      uuid.MustParse("b86768ee-69de-4fb2-81eb-ab96d14e37ae"),
+			event: EventUpdate{
+				ItemUUID:  uuid.MustParse("b86768ee-69de-4fb2-81eb-ab96d14e37ae"),
 				Name:      "test event",
 				Debit:     false,
 				Credit:    true,
@@ -452,7 +253,7 @@ func TestUpdateEvent(t *testing.T) {
 			// add budget-micro-service exchange
 			ms.Append(tc.exchange)
 
-			ev, e := s.UpdateEvent(tc.event)
+			ev, e := s.UpdateEvent(tc.uuid, tc.event)
 			// test error
 			if tc.E.e != nil {
 				if tc.E.e.Error() != e.Error() {
@@ -463,7 +264,7 @@ func TestUpdateEvent(t *testing.T) {
 			}
 			// test event
 			if tc.E.event != ev {
-				t.Errorf("expected event '%v' got '%v'", tc.E.event, ev)
+				t.Errorf("expected event '%+v' got '%+v'", tc.E.event, ev)
 			}
 		})
 	}

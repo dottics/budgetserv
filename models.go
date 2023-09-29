@@ -20,6 +20,7 @@ type Group struct {
 	Name        string    `json:"name"`
 	Description string    `json:"description"`
 	SubGroups   []Group   `json:"sub_groups"`
+	Items       []Item    `json:"items"`
 }
 
 type Groups []Group
