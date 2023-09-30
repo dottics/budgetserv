@@ -98,3 +98,33 @@ func (s *Service) CreateGroup(payload GroupCreatePayload) (Group, error) {
 	}
 	return resp.Data.Group, nil
 }
+
+// UpdateGroup updates a specific group based on the GroupUpdatePayload which
+// is passed as a parameter.
+func (s *Service) UpdateGroup(payload GroupUpdatePayload) (Group, error) {
+	s.URL.Path = fmt.Sprintf("/group/%s", payload.UUID.String())
+	p, err := marshalReader(payload)
+	if err != nil {
+		return Group{}, err
+	}
+
+	res, e := s.DoRequest("PUT", s.URL, nil, nil, p)
+	if e != nil {
+		return Group{}, e
+	}
+
+	type data struct {
+		Group Group `json:"group"`
+	}
+
+	resp := struct {
+		Message string `json:"message"`
+		Data    data   `json:"data"`
+	}{}
+
+	err = marshalResponse(200, res, &resp)
+	if err != nil {
+		return Group{}, err
+	}
+	return resp.Data.Group, nil
+}

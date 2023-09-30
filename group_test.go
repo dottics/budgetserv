@@ -380,3 +380,74 @@ func TestService_CreateGroup(t *testing.T) {
 		})
 	}
 }
+
+func TestService_UpdateGroup(t *testing.T) {
+	tt := []struct {
+		name     string
+		payload  GroupUpdatePayload
+		exchange *microtest.Exchange
+		uri      string
+		group    Group
+		e        error
+	}{
+		{
+			name: "403 Permission Required",
+			payload: GroupUpdatePayload{
+				UUID: testGroup.UUID,
+				Name: "test group",
+			},
+			exchange: &microtest.Exchange{
+				Response: microtest.Response{
+					Status: 403,
+					Body:   noPermission,
+				},
+			},
+			uri:   "/group/52f2c725-2cdc-401a-abdd-66db5fd06789",
+			group: Group{},
+			e:     errors.New("no permission"),
+		},
+		{
+			name: "200 Successful",
+			payload: GroupUpdatePayload{
+				UUID: testGroup.UUID,
+				Name: "test group",
+			},
+			exchange: &microtest.Exchange{
+				Response: microtest.Response{
+					Status: 200,
+					Body:   string(responseGroup),
+				},
+			},
+			uri:   "/group/52f2c725-2cdc-401a-abdd-66db5fd06789",
+			group: testGroup,
+			e:     nil,
+		},
+	}
+
+	s := NewService(Config{})
+	ms := microtest.MockServer(s)
+	defer ms.Server.Close()
+
+	for _, tc := range tt {
+		t.Run(tc.name, func(t *testing.T) {
+			// add the budget-micro-service exchange
+			ms.Append(tc.exchange)
+
+			g, e := s.UpdateGroup(tc.payload)
+			// test the error response
+			if NotEqualError(tc.e, e) {
+				t.Errorf("expected error '%v' got '%v'", tc.e, e)
+			}
+
+			// test the group structure returned
+			if EqualGroup(g, tc.group) == false {
+				t.Errorf("expected group\n'%+v'\ngot\n'%+v'", tc.group, g)
+			}
+
+			// test the exchange request URI
+			if tc.exchange.Request.RequestURI != tc.uri {
+				t.Errorf("expected uri '%v' got '%v'", tc.uri, tc.exchange.Request.RequestURI)
+			}
+		})
+	}
+}
