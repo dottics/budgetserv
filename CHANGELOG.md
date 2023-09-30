@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The `GetGroup` method to be able to get a specific group.
 - The `CreateGroup` method to be able to create a new group.
 - The `UpdateGroup` method to be able to update a group.
+- The `DeleteGroup` method to be able to delete a group.
 
 ## [0.1.0] - 2023-08-18
 ### Added

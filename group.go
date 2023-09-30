@@ -128,3 +128,25 @@ func (s *Service) UpdateGroup(payload GroupUpdatePayload) (Group, error) {
 	}
 	return resp.Data.Group, nil
 }
+
+// DeleteGroup deletes a specific group. The group is identified using the uuid
+// parameter. The methods also deletes all subgroups, items and events related
+// to the group.
+func (s *Service) DeleteGroup(UUID uuid.UUID) error {
+	s.URL.Path = fmt.Sprintf("/group/%s", UUID.String())
+
+	res, e := s.DoRequest("DELETE", s.URL, nil, nil, nil)
+	if e != nil {
+		return e
+	}
+
+	resp := struct {
+		Message string `json:"message"`
+	}{}
+
+	err := marshalResponse(200, res, &resp)
+	if err != nil {
+		return err
+	}
+	return nil
+}

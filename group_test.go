@@ -451,3 +451,60 @@ func TestService_UpdateGroup(t *testing.T) {
 		})
 	}
 }
+
+func TestService_DeleteGroup(t *testing.T) {
+	tt := []struct {
+		name      string
+		groupUUID uuid.UUID
+		exchange  *microtest.Exchange
+		uri       string
+		e         error
+	}{
+		{
+			name:      "403 Permission Required",
+			groupUUID: testGroup.UUID,
+			exchange: &microtest.Exchange{
+				Response: microtest.Response{
+					Status: 403,
+					Body:   noPermission,
+				},
+			},
+			uri: "/group/52f2c725-2cdc-401a-abdd-66db5fd06789",
+			e:   errors.New("no permission"),
+		},
+		{
+			name:      "204 No Content",
+			groupUUID: testGroup.UUID,
+			exchange: &microtest.Exchange{
+				Response: microtest.Response{
+					Status: 200,
+					Body:   `{"message": "group deleted"}`,
+				},
+			},
+			uri: "/group/52f2c725-2cdc-401a-abdd-66db5fd06789",
+			e:   nil,
+		},
+	}
+
+	s := NewService(Config{})
+	ms := microtest.MockServer(s)
+	defer ms.Server.Close()
+
+	for _, tc := range tt {
+		t.Run(tc.name, func(t *testing.T) {
+			// add the budget-micro-service exchange
+			ms.Append(tc.exchange)
+
+			e := s.DeleteGroup(tc.groupUUID)
+			// test the error response
+			if NotEqualError(tc.e, e) {
+				t.Errorf("expected error '%v' got '%v'", tc.e, e)
+			}
+
+			// test the exchange request URI
+			if tc.exchange.Request.RequestURI != tc.uri {
+				t.Errorf("expected uri '%v' got '%v'", tc.uri, tc.exchange.Request.RequestURI)
+			}
+		})
+	}
+}
