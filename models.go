@@ -61,7 +61,7 @@ type Item struct {
 	UUID        uuid.UUID `json:"uuid"`
 	Name        string    `json:"name"`
 	Description string    `json:"description"`
-	Events      Events    `json:"-"`
+	Events      Events    `json:"events"`
 }
 
 // MonthlyTotal calculates to total monthly effect of each event of the item.
