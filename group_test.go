@@ -2,7 +2,6 @@ package budget
 
 import (
 	"errors"
-	"fmt"
 	"github.com/dottics/dutil"
 	"github.com/google/uuid"
 	"github.com/johannesscr/micro/microtest"
@@ -224,23 +223,15 @@ func TestService_GetGroups(t *testing.T) {
 
 			xg, e := s.GetGroups(tc.budgetUUID)
 			// test the error response
-			if tc.E.e != nil {
-				if tc.E.e.Error() != e.Error() {
-					t.Errorf("expected error '%v' got '%v'", tc.E.e.Error(), e.Error())
-				}
-			} else if e != nil {
-				t.Errorf("unexpected error: %s", e.Error())
+			if NotEqualError(tc.E.e, e) {
+				t.Errorf("expected error '%v' got '%v'", tc.E.e, e)
 			}
 
 			// test the groups structure returned
-			if len(xg) != len(tc.E.groups) {
-				t.Errorf("expected len groups %d got %d", len(tc.E.groups), len(xg))
+			if EqualGroups(xg, tc.E.groups) == false {
+				t.Errorf("expected groups\n'%+v'\ngot\n'%+v'", tc.E.groups, xg)
 			}
-			seg := fmt.Sprintf("%v", tc.E.groups)
-			sxg := fmt.Sprintf("%v", xg)
-			if seg != sxg {
-				t.Errorf("expected groups '%v' got '%v'", seg, sxg)
-			}
+
 			// test the exchange request URI
 			if tc.exchange.Request.RequestURI != tc.E.exReqURI {
 				t.Errorf("expected uri '%v' got '%v'", tc.E.exReqURI, tc.exchange.Request.RequestURI)
@@ -310,12 +301,8 @@ func TestService_GetGroup(t *testing.T) {
 
 			xg, e := s.GetGroup(tc.groupUUID)
 			// test the error response
-			if tc.e != nil {
-				if tc.e.Error() != e.Error() {
-					t.Errorf("expected error '%v' got '%v'", tc.e.Error(), e.Error())
-				}
-			} else if e != nil {
-				t.Errorf("unexpected error: %s", e.Error())
+			if NotEqualError(tc.e, e) {
+				t.Errorf("expected error '%v' got '%v'", tc.e, e)
 			}
 
 			// test the group structure returned
@@ -325,6 +312,70 @@ func TestService_GetGroup(t *testing.T) {
 			// test the exchange request URI
 			if tc.exchange.Request.RequestURI != tc.uri {
 				t.Errorf("expected uri '%v' got '%v'", tc.uri, tc.exchange.Request.RequestURI)
+			}
+		})
+	}
+}
+
+func TestService_CreateGroup(t *testing.T) {
+	tt := []struct {
+		name     string
+		payload  GroupCreatePayload
+		exchange *microtest.Exchange
+		uri      string
+		group    Group
+		e        error
+	}{
+		{
+			name: "403 Permission Required",
+			payload: GroupCreatePayload{
+				Name: "test group",
+			},
+			exchange: &microtest.Exchange{
+				Response: microtest.Response{
+					Status: 403,
+					Body:   noPermission,
+				},
+			},
+			uri:   "/group/",
+			group: Group{},
+			e:     errors.New("no permission"),
+		},
+		{
+			name: "201 Created",
+			payload: GroupCreatePayload{
+				Name: "test group",
+			},
+			exchange: &microtest.Exchange{
+				Response: microtest.Response{
+					Status: 201,
+					Body:   string(responseGroupBasic),
+				},
+			},
+			uri:   "/group/",
+			group: testGroupBasic,
+			e:     nil,
+		},
+	}
+
+	s := NewService(Config{})
+	ms := microtest.MockServer(s)
+	defer ms.Server.Close()
+
+	for _, tc := range tt {
+		t.Run(tc.name, func(t *testing.T) {
+			// add the budget-micro-service exchange
+			ms.Append(tc.exchange)
+
+			g, e := s.CreateGroup(tc.payload)
+			// test the error response
+			if NotEqualError(tc.e, e) {
+				t.Errorf("expected error '%v' got '%v'", tc.e, e)
+			}
+
+			// test the group structure returned
+			if EqualGroup(g, tc.group) == false {
+				t.Errorf("expected group\n'%+v'\ngot\n'%+v'", tc.group, g)
 			}
 		})
 	}

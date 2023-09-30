@@ -28,7 +28,14 @@ type Budget struct {
 
 type Budgets []Budget
 
-type GroupPayload struct {
+type GroupCreatePayload struct {
+	BudgetUUID  uuid.UUID `json:"budget_uuid"`
+	Name        string    `json:"name"`
+	Description string    `json:"description"`
+}
+
+type GroupUpdatePayload struct {
+	UUID        uuid.UUID `json:"uuid"`
 	BudgetUUID  uuid.UUID `json:"budget_uuid"`
 	Name        string    `json:"name"`
 	Description string    `json:"description"`

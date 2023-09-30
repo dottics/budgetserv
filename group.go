@@ -68,3 +68,33 @@ func (s *Service) GetGroup(UUID uuid.UUID) (Group, error) {
 	}
 	return resp.Data.Group, nil
 }
+
+// CreateGroup creates a new group based on the GroupCreatePayload which is
+// passed as a parameter.
+func (s *Service) CreateGroup(payload GroupCreatePayload) (Group, error) {
+	s.URL.Path = "/group/"
+	p, err := marshalReader(payload)
+	if err != nil {
+		return Group{}, err
+	}
+
+	res, e := s.DoRequest("POST", s.URL, nil, nil, p)
+	if e != nil {
+		return Group{}, e
+	}
+
+	type data struct {
+		Group Group `json:"group"`
+	}
+
+	resp := struct {
+		Message string `json:"message"`
+		Data    data   `json:"data"`
+	}{}
+
+	err = marshalResponse(201, res, &resp)
+	if err != nil {
+		return Group{}, err
+	}
+	return resp.Data.Group, nil
+}

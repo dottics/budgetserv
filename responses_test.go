@@ -173,6 +173,23 @@ var responseBudgets = json.RawMessage(`{
 	}	
 }`)
 
+var testGroupBasic = Group{
+	UUID:        uuid.MustParse("52f2c725-2cdc-401a-abdd-66db5fd06789"),
+	Name:        "income",
+	Description: "income description",
+}
+
+var responseGroupBasic = json.RawMessage(`{
+	"message": "group retrieved",
+	"data": {
+		"group": {
+			"uuid": "52f2c725-2cdc-401a-abdd-66db5fd06789",
+			"name": "income",
+			"description": "income description"
+		}
+	}
+}`)
+
 var testGroup = Group{
 	UUID:      uuid.MustParse("52f2c725-2cdc-401a-abdd-66db5fd06789"),
 	Name:      "income",
