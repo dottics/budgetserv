@@ -1,0 +1,15 @@
+name: CI
+on: push
+jobs:
+  unit-test:
+    runs-on: ubuntu-latest
+    container: golang:1.21
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install dependencies
+        run: go mod download
+
+      - name: Unit Tests
+        run: go test -v ./...

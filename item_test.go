@@ -1,147 +1,47 @@
 package budget
 
 import (
-	"github.com/dottics/dutil"
+	"errors"
+	"fmt"
 	"github.com/google/uuid"
 	"github.com/johannesscr/micro/microtest"
 	"testing"
 )
 
 func TestService_GetItems(t *testing.T) {
-	type E struct {
-		e        dutil.Error
-		items    Items
-		exReqURI string
-	}
-	tt := []struct {
-		name     string
-		uuid     uuid.UUID
-		exchange *microtest.Exchange
-		E        E
+	tests := []struct {
+		name      string
+		groupUUID uuid.UUID
+		exchange  *microtest.Exchange
+		uri       string
+		items     Items
+		e         error
 	}{
 		{
-			name: "403 Permission Required",
-			uuid: uuid.MustParse("a0e09cfc-414d-4b42-9661-333090390a16"),
+			name:      "403 permission required",
+			groupUUID: uuid.MustParse("40355dba-0923-43a6-83d5-c9b6680edd2e"),
 			exchange: &microtest.Exchange{
 				Response: microtest.Response{
 					Status: 403,
-					Body: `{
-						"message":"Forbidden: unable to process request",
-						"data":{},
-						"errors":{
-							"auth":["Please ensure you have permission"]
-						}
-					}`,
+					Body:   noPermission,
 				},
 			},
-			E: E{
-				exReqURI: "/budget/group/-/item?uuid=a0e09cfc-414d-4b42-9661-333090390a16",
-				items:    Items{},
-				e: &dutil.Err{
-					Status: 403,
-					Errors: map[string][]string{
-						"auth": {"Please ensure you have permission"},
-					},
-				},
-			},
+			uri:   "/group/40355dba-0923-43a6-83d5-c9b6680edd2e/items",
+			items: Items{},
+			e:     errors.New("no permission"),
 		},
 		{
-			name: "404 Not Found",
-			uuid: uuid.MustParse("0db30884-59ab-4214-8ae1-d3a1a3ae81c9"),
-			exchange: &microtest.Exchange{
-				Response: microtest.Response{
-					Status: 404,
-					Body: `{
-						"message":"NotFound: unable to process request",
-						"data":{},
-						"errors":{
-							"group":["not found"]
-						}
-					}`,
-				},
-			},
-			E: E{
-				exReqURI: "/budget/group/-/item?uuid=0db30884-59ab-4214-8ae1-d3a1a3ae81c9",
-				items:    Items{},
-				e: &dutil.Err{
-					Status: 401,
-					Errors: map[string][]string{
-						"group": {"not found"},
-					},
-				},
-			},
-		},
-		{
-			name: "200 Successful Empty",
-			uuid: uuid.MustParse("7fa5252e-faaf-4486-ba68-ca6d00c203cf"),
+			name:      "200 successful",
+			groupUUID: uuid.MustParse("f27ef50d-f10f-4ff8-b65a-d64b1ebb83c8"),
 			exchange: &microtest.Exchange{
 				Response: microtest.Response{
 					Status: 200,
-					Body: `{
-						"message":"NotFound: unable to process request",
-						"data":{"items":[]},
-						"errors":{}
-					}`,
+					Body:   string(responseGroupItems),
 				},
 			},
-			E: E{
-				exReqURI: "/budget/group/-/item?uuid=7fa5252e-faaf-4486-ba68-ca6d00c203cf",
-				items:    Items{},
-				e:        nil,
-			},
-		},
-		{
-			name: "200 Successful",
-			uuid: uuid.MustParse("4694620e-a67e-418e-8b41-44a2413a6450"),
-			exchange: &microtest.Exchange{
-				Response: microtest.Response{
-					Status: 200,
-					Body: `{
-						"message":"NotFound: unable to process request",
-						"data":{
-							"items":[
-								{
-									"uuid":"d2b64e51-8b31-4cbd-be90-439ddb33c3b7",
-									"name":"item one",
-									"active":true
-								},
-								{
-									"uuid":"c1d396ab-4e32-4d1e-9baf-48a10529cf80",
-									"name":"item two",
-									"active":true
-								},
-								{
-									"uuid":"8e5ec8c2-f89b-464f-ba66-06f9365ebb2b",
-									"name":"item three",
-									"active":true
-								}
-							]
-						},
-						"errors":{}
-					}`,
-				},
-			},
-			E: E{
-				exReqURI: "/budget/group/-/item?uuid=4694620e-a67e-418e-8b41-44a2413a6450",
-				items: Items{
-					Item{
-						UUID:   uuid.MustParse("d2b64e51-8b31-4cbd-be90-439ddb33c3b7"),
-						Name:   "item one",
-						Active: true,
-					},
-					Item{
-						UUID:   uuid.MustParse("c1d396ab-4e32-4d1e-9baf-48a10529cf80"),
-						Name:   "item two",
-						Active: true,
-					},
-					Item{
-						UUID:   uuid.MustParse("8e5ec8c2-f89b-464f-ba66-06f9365ebb2b"),
-						Name:   "item three",
-						Active: true,
-					},
-				},
-				e: nil,
-			},
+			uri:   "/group/f27ef50d-f10f-4ff8-b65a-d64b1ebb83c8/items",
+			items: testGroupItems,
+			e:     nil,
 		},
 	}
 
@@ -149,41 +49,275 @@ func TestService_GetItems(t *testing.T) {
 	ms := microtest.MockServer(s)
 	defer ms.Server.Close()
 
-	for _, tc := range tt {
-		t.Run(tc.name, func(t *testing.T) {
-			// add budget-mirco-service exchange
+	for i, tc := range tests {
+		name := fmt.Sprintf("%d %s", i, tc.name)
+		t.Run(name, func(t *testing.T) {
 			ms.Append(tc.exchange)
 
-			xi, e := s.GetItems(tc.uuid)
-			// test errors
-			if tc.E.e != nil {
-				if tc.E.e.Error() != e.Error() {
-					t.Errorf("expected error '%v' got '%v'", tc.E.e.Error(), e.Error())
-				}
-			} else if e != nil {
-				t.Errorf("unexpected err: %s", e.Error())
+			items, e := s.GetItems(tc.groupUUID)
+
+			// ensure errors match as expected
+			if NotEqualError(e, tc.e) {
+				t.Errorf("expected error %v, got %v", tc.e, e)
 			}
 
-			// test items
-			if len(tc.E.items) != len(xi) {
-				t.Errorf("expected items length %d got %d", len(tc.E.items), len(xi))
-			}
-			for i, item := range tc.E.items {
-				j := xi[i]
-				if item.UUID != j.UUID {
-					t.Errorf("expected uuid '%v' got '%v'", item.UUID, j.UUID)
-				}
-				if item.Name != j.Name {
-					t.Errorf("expected name '%v' got '%v'", item.Name, j.Name)
-				}
-				if item.Active != j.Active {
-					t.Errorf("expected active '%v' got '%v'", item.Active, j.Active)
-				}
+			// ensure items match as expected
+			if EqualItems(items, tc.items) == false {
+				t.Errorf("expected items\n%+v\ngot\n%+v", tc.items, items)
 			}
 
-			// test exchange request
-			if tc.exchange.Request.RequestURI != tc.E.exReqURI {
-				t.Errorf("expected URI '%v' got '%v'", tc.E.exReqURI, tc.exchange.Request.RequestURI)
+			// ensure the correct uri was called
+			if tc.uri != tc.exchange.Request.RequestURI {
+				t.Errorf("expected uri %s, got %s", tc.uri, tc.exchange.Request.RequestURI)
+			}
+		})
+	}
+}
+
+func TestService_CreateItem(t *testing.T) {
+	tests := []struct {
+		name     string
+		payload  ItemCreatePayload
+		exchange *microtest.Exchange
+		uri      string
+		item     Item
+		e        error
+	}{
+		{
+			name: "403 permission required",
+			payload: ItemCreatePayload{
+				GroupUUID: uuid.MustParse("40355dba-0923-43a6-83d5-c9b6680edd2e"),
+				Name:      "test item",
+			},
+			exchange: &microtest.Exchange{
+				Response: microtest.Response{
+					Status: 403,
+					Body:   noPermission,
+				},
+			},
+			uri:  "/item/",
+			item: Item{},
+			e:    errors.New("no permission"),
+		},
+		{
+			name: "404 group not found",
+			payload: ItemCreatePayload{
+				GroupUUID: uuid.MustParse("f27ef50d-f10f-4ff8-b65a-d64b1ebb83c8"),
+				Name:      "test item",
+			},
+			exchange: &microtest.Exchange{
+				Response: microtest.Response{
+					Status: 404,
+					Body:   notFound,
+				},
+			},
+			uri:  "/item/",
+			item: Item{},
+			e:    errors.New("not found"),
+		},
+		{
+			name: "201 successful",
+			payload: ItemCreatePayload{
+				GroupUUID: uuid.MustParse("f27ef50d-f10f-4ff8-b65a-d64b1ebb83c8"),
+				Name:      "test item",
+			},
+			exchange: &microtest.Exchange{
+				Response: microtest.Response{
+					Status: 201,
+					Body:   string(responseItemNew),
+				},
+			},
+			uri:  "/item/",
+			item: testItemNew,
+			e:    nil,
+		},
+	}
+
+	s := NewService(Config{})
+	ms := microtest.MockServer(s)
+	defer ms.Server.Close()
+
+	for i, tc := range tests {
+		name := fmt.Sprintf("%d %s", i, tc.name)
+		t.Run(name, func(t *testing.T) {
+			ms.Append(tc.exchange)
+
+			item, e := s.CreateItem(tc.payload)
+
+			// ensure errors match as expected
+			if NotEqualError(e, tc.e) {
+				t.Errorf("expected error %v, got %v", tc.e, e)
+			}
+
+			// ensure items match as expected
+			if EqualItem(item, tc.item) == false {
+				t.Errorf("expected item\n%+v\ngot\n%+v", tc.item, item)
+			}
+
+			// ensure the correct uri was called
+			if tc.uri != tc.exchange.Request.RequestURI {
+				t.Errorf("expected uri %s, got %s", tc.uri, tc.exchange.Request.RequestURI)
+			}
+		})
+	}
+}
+
+func TestService_UpdateItem(t *testing.T) {
+	tests := []struct {
+		name     string
+		payload  ItemUpdatePayload
+		exchange *microtest.Exchange
+		uri      string
+		item     Item
+		e        error
+	}{
+		{
+			name: "403 permission required",
+			payload: ItemUpdatePayload{
+				UUID:      uuid.MustParse("40355dba-0923-43a6-83d5-c9b6680edd2e"),
+				GroupUUID: uuid.MustParse("f71ce1d0-0ddd-4a39-9abd-baea8a6d8bbe"),
+				Name:      "test item",
+			},
+			exchange: &microtest.Exchange{
+				Response: microtest.Response{
+					Status: 403,
+					Body:   noPermission,
+				},
+			},
+			uri:  "/item/40355dba-0923-43a6-83d5-c9b6680edd2e",
+			item: Item{},
+			e:    errors.New("no permission"),
+		},
+		{
+			name: "404 item not found",
+			payload: ItemUpdatePayload{
+				UUID:      uuid.MustParse("f27ef50d-f10f-4ff8-b65a-d64b1ebb83c8"),
+				GroupUUID: uuid.MustParse("f71ce1d0-0ddd-4a39-9abd-baea8a6d8bbe"),
+				Name:      "test item",
+			},
+			exchange: &microtest.Exchange{
+				Response: microtest.Response{
+					Status: 404,
+					Body:   notFound,
+				},
+			},
+			uri:  "/item/f27ef50d-f10f-4ff8-b65a-d64b1ebb83c8",
+			item: Item{},
+			e:    errors.New("not found"),
+		},
+		{
+			name: "200 successful",
+			payload: ItemUpdatePayload{
+				UUID:      uuid.MustParse("f27ef50d-f10f-4ff8-b65a-d64b1ebb83c8"),
+				GroupUUID: uuid.MustParse("f71ce1d0-0ddd-4a39-9abd-baea8a6d8bbe"),
+				Name:      "test item",
+			},
+			exchange: &microtest.Exchange{
+				Response: microtest.Response{
+					Status: 200,
+					Body:   string(responseItem),
+				},
+			},
+			uri:  "/item/f27ef50d-f10f-4ff8-b65a-d64b1ebb83c8",
+			item: testItem,
+			e:    nil,
+		},
+	}
+
+	s := NewService(Config{})
+	ms := microtest.MockServer(s)
+	defer ms.Server.Close()
+
+	for i, tc := range tests {
+		name := fmt.Sprintf("%d %s", i, tc.name)
+		t.Run(name, func(t *testing.T) {
+			ms.Append(tc.exchange)
+
+			item, e := s.UpdateItem(tc.payload)
+
+			// ensure errors match as expected
+			if NotEqualError(e, tc.e) {
+				t.Errorf("expected error %v, got %v", tc.e, e)
+			}
+
+			// ensure items match as expected
+			if EqualItem(item, tc.item) == false {
+				t.Errorf("expected item\n%+v\ngot\n%+v", tc.item, item)
+			}
+
+			// ensure the correct uri was called
+			if tc.uri != tc.exchange.Request.RequestURI {
+				t.Errorf("expected uri %s, got %s", tc.uri, tc.exchange.Request.RequestURI)
+			}
+		})
+	}
+}
+
+func TestService_DeleteItem(t *testing.T) {
+	tests := []struct {
+		name     string
+		uuid     uuid.UUID
+		exchange *microtest.Exchange
+		uri      string
+		e        error
+	}{
+		{
+			name: "403 permission required",
+			uuid: uuid.MustParse("40355dba-0923-43a6-83d5-c9b6680edd2e"),
+			exchange: &microtest.Exchange{
+				Response: microtest.Response{
+					Status: 403,
+					Body:   noPermission,
+				},
+			},
+			uri: "/item/40355dba-0923-43a6-83d5-c9b6680edd2e",
+			e:   errors.New("no permission"),
+		},
+		{
+			name: "404 item not found",
+			uuid: uuid.MustParse("f27ef50d-f10f-4ff8-b65a-d64b1ebb83c8"),
+			exchange: &microtest.Exchange{
+				Response: microtest.Response{
+					Status: 404,
+					Body:   notFound,
+				},
+			},
+			uri: "/item/f27ef50d-f10f-4ff8-b65a-d64b1ebb83c8",
+			e:   errors.New("not found"),
+		},
+		{
+			name: "200 successful",
+			uuid: uuid.MustParse("f27ef50d-f10f-4ff8-b65a-d64b1ebb83c8"),
+			exchange: &microtest.Exchange{
+				Response: microtest.Response{
+					Status: 200,
+					Body:   `{"message": "item deleted"}`,
+				},
+			},
+			uri: "/item/f27ef50d-f10f-4ff8-b65a-d64b1ebb83c8",
+			e:   nil,
+		},
+	}
+
+	s := NewService(Config{})
+	ms := microtest.MockServer(s)
+	defer ms.Server.Close()
+
+	for i, tc := range tests {
+		name := fmt.Sprintf("%d %s", i, tc.name)
+		t.Run(name, func(t *testing.T) {
+			ms.Append(tc.exchange)
+
+			e := s.DeleteItem(tc.uuid)
+
+			// ensure errors match as expected
+			if NotEqualError(e, tc.e) {
+				t.Errorf("expected error %v, got %v", tc.e, e)
+			}
+
+			// ensure the correct uri was called
+			if tc.uri != tc.exchange.Request.RequestURI {
+				t.Errorf("expected uri %s, got %s", tc.uri, tc.exchange.Request.RequestURI)
 			}
 		})
 	}

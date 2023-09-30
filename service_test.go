@@ -3,11 +3,7 @@ package budget
 import (
 	"github.com/dottics/dutil"
 	"github.com/johannesscr/micro/microtest"
-	"io/ioutil"
-	"net/http"
-	"net/url"
 	"os"
-	"strings"
 	"testing"
 )
 
@@ -123,139 +119,6 @@ func TestService_SetEnv(t *testing.T) {
 	}
 }
 
-func TestService_NewRequest(t *testing.T) {
-	s := NewService(Config{UserToken: "test-fake-token"})
-	//s.SetURL("http", "test.dottics.com")
-	ms := microtest.MockServer(s)
-	defer ms.Server.Close()
-
-	// add an exchange to capture the request sent
-	ex := &microtest.Exchange{
-		Response: microtest.Response{
-			Status: 200,
-			Body:   `{"message":"successful request"}`,
-		},
-	}
-	ms.Append(ex)
-
-	// encode the url
-	s.URL.Path = "/my/path"
-	q := url.Values{}
-	q.Add("u", "my value")
-	s.URL.RawQuery = q.Encode()
-	// set the headers
-	h := map[string][]string{
-		"X-Random": {"my-random-header"},
-	}
-	// add the body
-	p := strings.NewReader(`{"name":"james"}`)
-
-	// now to make the request
-	_, e := s.newRequest("PUT", s.URL.String(), h, p)
-
-	if e != nil {
-		t.Errorf("unexpected error: %v", e)
-	}
-	// test that the request was made correctly
-	// test the request URI
-	if ex.Request.RequestURI != "/my/path?u=my+value" {
-		t.Errorf("expected '%v' got '%v'", "/my/path?u=my+value", ex.Request.RequestURI)
-	}
-	// test the headers
-	h1 := ex.Request.Header.Get("X-Random")
-	h2 := ex.Request.Header.Get("Content-Type")
-	h3 := ex.Request.Header.Get("X-User-Token")
-	if h1 != "my-random-header" {
-		t.Errorf("expected '%v' got '%v'", "my-random-header", h1)
-	}
-	if h2 != "application/json" {
-		t.Errorf("expected '%v' got '%v'", "application/json", h2)
-	}
-	if h3 != "test-fake-token" {
-		t.Errorf("expected '%v' got '%v'", "test-fake-token", h3)
-	}
-	// test the body
-}
-
-func TestService_decode(t *testing.T) {
-	type payload struct {
-		Name string `json:"name"`
-	}
-	type E struct {
-		body string
-		data payload
-		e    dutil.Err
-	}
-	tt := []struct {
-		name string
-		res  *http.Response
-		v    interface{}
-		E    E
-	}{
-		{
-			name: "no interface",
-			res: &http.Response{
-				Body: ioutil.NopCloser(strings.NewReader(`{"name":"james"}`)),
-			},
-			v: nil,
-			E: E{
-				data: payload{},
-				body: `{"name":"james"}`,
-			},
-		},
-		{
-			name: "unmarshal error",
-			res: &http.Response{
-				Body: ioutil.NopCloser(strings.NewReader(`{"name":1}`)),
-			},
-			v: &payload{},
-			E: E{
-				body: "",
-				data: payload{},
-				e: dutil.Err{
-					Status: 500,
-					Errors: map[string][]string{
-						"unmarshal": {"json: cannot unmarshal number into Go struct field payload.name of type string"},
-					},
-				},
-			},
-		},
-		{
-			name: "successful unmarshal",
-			res: &http.Response{
-				Body: ioutil.NopCloser(strings.NewReader(`{"name":"james"}`)),
-			},
-			v: &payload{},
-			E: E{
-				body: `{"name":"james"}`,
-				data: payload{Name: "james"},
-				e:    dutil.Err{},
-			},
-		},
-	}
-
-	s := NewService(Config{})
-
-	for _, tc := range tt {
-		t.Run(tc.name, func(t *testing.T) {
-			xb, e := s.decode(tc.res, tc.v)
-			if tc.E.e.Status != 0 {
-				if tc.E.e.Error() != e.Error() {
-					t.Errorf("expected '%v' got '%v'", tc.E.e.Error(), e.Error())
-				}
-			}
-			if string(xb) != tc.E.body {
-				t.Errorf("expected '%v' got '%v'", tc.E.body, string(xb))
-			}
-			if tc.E.data != (payload{}) {
-				if tc.E.data.Name != "james" {
-					t.Errorf("expected '%v' got '%v'", tc.E.data.Name, "james")
-				}
-			}
-		})
-	}
-}
-
 func TestGetHome(t *testing.T) {
 	type E struct {
 		alive bool
@@ -326,7 +189,7 @@ func TestGetHome(t *testing.T) {
 			// append the exchange for the test
 			ms.Append(tc.exchange)
 
-			alive, e := s.GetHome()
+			alive, e := s.HealthCheck()
 			if tc.E.alive != alive {
 				t.Errorf("expected '%v' got '%v'", tc.E.alive, alive)
 			}
