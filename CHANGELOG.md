@@ -5,6 +5,10 @@ The format is based on [Keep a changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+## [0.1.2] - 2023-09-30
+### Fixed
+- The `GetGroups` method to also return a standard error.
+
 ## [0.1.1] - 2023-09-29
 ### Added
 - The `CreateBudget` method to be able to create a new budget.

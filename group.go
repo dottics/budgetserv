@@ -2,17 +2,20 @@ package budget
 
 import (
 	"fmt"
-	"github.com/dottics/dutil"
 	"github.com/google/uuid"
-	"github.com/johannesscr/micro/msp"
 )
 
 // GetGroups retrieves all the groups related to a specific budget. The budget
 // is identified using the uuid parameter.
 //
 // uuid (uuid.UUID) for the budget.
-func (s *Service) GetGroups(BudgetUUID uuid.UUID) (Groups, dutil.Error) {
+func (s *Service) GetGroups(BudgetUUID uuid.UUID) (Groups, error) {
 	s.URL.Path = fmt.Sprintf("/budget/%s/groups", BudgetUUID.String())
+
+	res, e := s.DoRequest("GET", s.URL, nil, nil, nil)
+	if e != nil {
+		return Groups{}, e
+	}
 
 	type data struct {
 		Groups Groups `json:"groups"`
@@ -21,24 +24,11 @@ func (s *Service) GetGroups(BudgetUUID uuid.UUID) (Groups, dutil.Error) {
 	resp := struct {
 		Message string `json:"message"`
 		Data    data   `json:"data"`
-		Errors  map[string][]string
 	}{}
 
-	res, e := s.DoRequest("GET", s.URL, nil, nil, nil)
-	if e != nil {
-		return nil, e
-	}
-	_, e = msp.Decode(res, &resp)
-	if e != nil {
-		return nil, e
-	}
-
-	if res.StatusCode != 200 {
-		e := &dutil.Err{
-			Status: res.StatusCode,
-			Errors: resp.Errors,
-		}
-		return nil, e
+	err := marshalResponse(200, res, &resp)
+	if err != nil {
+		return Groups{}, err
 	}
 	return resp.Data.Groups, nil
 }
