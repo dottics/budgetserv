@@ -4,33 +4,18 @@ import (
 	"fmt"
 	"github.com/dottics/dutil"
 	"github.com/google/uuid"
-	"github.com/johannesscr/micro/msp"
-	"time"
 )
-
-type EventCreate struct {
-	ItemUUID    uuid.UUID `json:"item_uuid"`
-	Name        string    `json:"name"`
-	Description string    `json:"description"`
-	Debit       bool      `json:"debit"`
-	Credit      bool      `json:"credit"`
-	Amount      float64   `json:"amount"`
-	StartDate   time.Time `json:"start_date"`
-	EndDate     time.Time `json:"end_date"`
-}
-
-type EventUpdate = EventCreate
 
 // CreateEvent makes the request to the budget-microservice to create a new
 // event and associate that event with an item
-func (s *Service) CreateEvent(event EventCreate) (Event, dutil.Error) {
-	s.URL.Path = "/event"
+func (s *Service) CreateEvent(event EventCreate) (Event, error) {
+	s.URL.Path = "/event/"
 
-	payload, e := dutil.MarshalReader(event)
-	if e != nil {
-		return Event{}, e
+	p, err := marshalReader(event)
+	if err != nil {
+		return Event{}, err
 	}
-	res, e := s.DoRequest("POST", s.URL, nil, nil, payload)
+	res, e := s.DoRequest("POST", s.URL, nil, nil, p)
 	if e != nil {
 		return Event{}, e
 	}
@@ -39,22 +24,13 @@ func (s *Service) CreateEvent(event EventCreate) (Event, dutil.Error) {
 		Event Event `json:"event"`
 	}
 	resp := struct {
-		Message string              `json:"message"`
-		Data    data                `json:"data"`
-		Errors  map[string][]string `json:"errors"`
+		Message string `json:"message"`
+		Data    data   `json:"data"`
 	}{}
 
-	_, e = msp.Decode(res, &resp)
-	if e != nil {
-		return Event{}, nil
-	}
-
-	if res.StatusCode != 200 {
-		e := &dutil.Err{
-			Status: res.StatusCode,
-			Errors: resp.Errors,
-		}
-		return Event{}, e
+	err = marshalResponse(201, res, &resp)
+	if err != nil {
+		return Event{}, err
 	}
 
 	return resp.Data.Event, nil
@@ -99,8 +75,7 @@ func (s *Service) DeleteEvent(UUID uuid.UUID) error {
 	}
 
 	resp := struct {
-		Message string            `json:"message"`
-		Data    map[string]string `json:"data"`
+		Message string `json:"message"`
 	}{}
 
 	err := marshalResponse(200, res, &resp)

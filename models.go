@@ -88,7 +88,7 @@ func (i Item) MonthlyTotal(year int) [12]float64 {
 
 type Items []Item
 
-type EventPayload struct {
+type EventCreate struct {
 	ItemUUID    uuid.UUID `json:"item_uuid"`
 	Name        string    `json:"name"`
 	Description string    `json:"description"`
@@ -98,6 +98,8 @@ type EventPayload struct {
 	StartDate   time.Time `json:"start_date"`
 	EndDate     time.Time `json:"end_date"`
 }
+
+type EventUpdate = EventCreate
 
 type Event struct {
 	UUID        uuid.UUID `json:"uuid"`

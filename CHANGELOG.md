@@ -19,6 +19,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The `UpdateItem` method to be able to update an item.
 - The `DeleteItem` method to be able to delete an item.
 
+### Updated
+- The `CreateEvent`, `UpdateEvent` and `DeleteEvent` methods to be able to
+  handle the new `Event` type.
+
 ## [0.1.0] - 2023-08-18
 ### Added
 - A `Config` type to define the configuration of the Budget microservice.
