@@ -329,3 +329,22 @@ var responseGroupItems = json.RawMessage(`{
 		]
 	}
 }`)
+
+var testItemNew = Item{
+	UUID:        uuid.MustParse("2bd06946-c355-4198-8766-949149331e04"),
+	Name:        "sold old items",
+	Description: "sold old items description",
+	Events:      Events{},
+}
+
+var responseItemNew = json.RawMessage(`{
+	"message": "item created",
+	"data": {
+		"item": {
+			"uuid": "2bd06946-c355-4198-8766-949149331e04",
+			"name": "sold old items",
+			"description": "sold old items description",
+			"events": []
+		}
+	}
+}`)
