@@ -32,7 +32,7 @@ func (s *Service) GetItems(GroupUUID uuid.UUID) (Items, error) {
 }
 
 // CreateItem creates a new item in a group based on the ItemPayload.
-func (s *Service) CreateItem(item ItemPayload) (Item, error) {
+func (s *Service) CreateItem(item ItemCreatePayload) (Item, error) {
 	s.URL.Path = "/item/"
 	p, err := marshalReader(item)
 	if err != nil {
@@ -54,6 +54,36 @@ func (s *Service) CreateItem(item ItemPayload) (Item, error) {
 	}{}
 
 	err = marshalResponse(201, res, &resp)
+	if err != nil {
+		return Item{}, err
+	}
+
+	return resp.Data.Item, nil
+}
+
+// UpdateItem updates an existing item based on the ItemPayload.
+func (s *Service) UpdateItem(item ItemUpdatePayload) (Item, error) {
+	s.URL.Path = fmt.Sprintf("/item/%s", item.UUID)
+	p, err := marshalReader(item)
+	if err != nil {
+		return Item{}, err
+	}
+
+	res, e := s.DoRequest("PUT", s.URL, nil, nil, p)
+	if e != nil {
+		return Item{}, e
+	}
+
+	type data struct {
+		Item Item `json:"item"`
+	}
+
+	resp := struct {
+		Message string `json:"message"`
+		Data    data   `json:"data"`
+	}{}
+
+	err = marshalResponse(200, res, &resp)
 	if err != nil {
 		return Item{}, err
 	}

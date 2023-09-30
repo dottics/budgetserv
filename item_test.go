@@ -77,7 +77,7 @@ func TestService_GetItems(t *testing.T) {
 func TestService_CreateItem(t *testing.T) {
 	tests := []struct {
 		name     string
-		payload  ItemPayload
+		payload  ItemCreatePayload
 		exchange *microtest.Exchange
 		uri      string
 		item     Item
@@ -85,7 +85,7 @@ func TestService_CreateItem(t *testing.T) {
 	}{
 		{
 			name: "403 permission required",
-			payload: ItemPayload{
+			payload: ItemCreatePayload{
 				GroupUUID: uuid.MustParse("40355dba-0923-43a6-83d5-c9b6680edd2e"),
 				Name:      "test item",
 			},
@@ -101,7 +101,7 @@ func TestService_CreateItem(t *testing.T) {
 		},
 		{
 			name: "404 group not found",
-			payload: ItemPayload{
+			payload: ItemCreatePayload{
 				GroupUUID: uuid.MustParse("f27ef50d-f10f-4ff8-b65a-d64b1ebb83c8"),
 				Name:      "test item",
 			},
@@ -117,7 +117,7 @@ func TestService_CreateItem(t *testing.T) {
 		},
 		{
 			name: "201 successful",
-			payload: ItemPayload{
+			payload: ItemCreatePayload{
 				GroupUUID: uuid.MustParse("f27ef50d-f10f-4ff8-b65a-d64b1ebb83c8"),
 				Name:      "test item",
 			},

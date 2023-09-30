@@ -51,7 +51,13 @@ type Group struct {
 
 type Groups []Group
 
-type ItemPayload struct {
+type ItemCreatePayload struct {
+	GroupUUID   uuid.UUID `json:"group_uuid"`
+	Name        string    `json:"name"`
+	Description string    `json:"description"`
+}
+type ItemUpdatePayload struct {
+	UUID        uuid.UUID `json:"uuid"`
 	GroupUUID   uuid.UUID `json:"group_uuid"`
 	Name        string    `json:"name"`
 	Description string    `json:"description"`
