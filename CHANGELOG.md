@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   items that are related to a group based on the group UUID.
 - The `CreateItem` method to be able to create a new item.
 - The `UpdateItem` method to be able to update an item.
+- The `DeleteItem` method to be able to delete an item.
 
 ## [0.1.0] - 2023-08-18
 ### Added

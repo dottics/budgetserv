@@ -90,3 +90,19 @@ func (s *Service) UpdateItem(item ItemUpdatePayload) (Item, error) {
 
 	return resp.Data.Item, nil
 }
+
+// DeleteItem deletes an existing item based on the Item's UUID.
+func (s *Service) DeleteItem(UUID uuid.UUID) error {
+	s.URL.Path = fmt.Sprintf("/item/%s", UUID)
+
+	res, e := s.DoRequest("DELETE", s.URL, nil, nil, nil)
+	if e != nil {
+		return e
+	}
+
+	resp := struct {
+		Message string `json:"message"`
+	}{}
+
+	return marshalResponse(200, res, &resp)
+}
