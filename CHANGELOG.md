@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The `GetItems` method to be able to get all items. This retrieves all the
   items that are related to a group based on the group UUID.
 - The `CreateItem` method to be able to create a new item.
+- The `UpdateItem` method to be able to update an item.
 
 ## [0.1.0] - 2023-08-18
 ### Added

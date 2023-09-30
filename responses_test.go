@@ -348,3 +348,60 @@ var responseItemNew = json.RawMessage(`{
 		}
 	}
 }`)
+
+var testItem = Item{
+	UUID:        uuid.MustParse("2bd06946-c355-4198-8766-949149331e04"),
+	Name:        "sold old items",
+	Description: "sold old items description",
+	Events: Events{
+		{
+			UUID:      uuid.MustParse("f71ce1d0-0ddd-4a39-9abd-baea8a6d8bbe"),
+			Name:      "go pro",
+			Amount:    8000,
+			Debit:     true,
+			Credit:    false,
+			StartDate: time.Date(2023, 3, 12, 0, 0, 0, 0, time.UTC),
+			EndDate:   time.Date(2023, 3, 12, 0, 0, 0, 0, time.UTC),
+		},
+		{
+			UUID:      uuid.MustParse("8feec066-2dfb-44f5-b353-1cb6e75c3084"),
+			Name:      "computer screen",
+			Amount:    5000,
+			Debit:     true,
+			Credit:    false,
+			StartDate: time.Date(2023, 5, 6, 0, 0, 0, 0, time.UTC),
+			EndDate:   time.Date(2023, 5, 6, 0, 0, 0, 0, time.UTC),
+		},
+	},
+}
+
+var responseItem = json.RawMessage(`{
+	"message": "item retrieved",
+	"data": {
+		"item": {
+			"uuid": "2bd06946-c355-4198-8766-949149331e04",
+			"name": "sold old items",
+			"description": "sold old items description",
+			"events": [
+				{
+					"uuid": "f71ce1d0-0ddd-4a39-9abd-baea8a6d8bbe",
+					"name": "go pro",
+					"amount": 8000,
+					"debit": true,
+					"credit": false,
+					"start_date": "2023-03-12T00:00:00Z",
+					"end_date": "2023-03-12T00:00:00Z"
+				},
+				{
+					"uuid": "8feec066-2dfb-44f5-b353-1cb6e75c3084",
+					"name": "computer screen",
+					"amount": 5000,
+					"debit": true,
+					"credit": false,
+					"start_date": "2023-05-06T00:00:00Z",
+					"end_date": "2023-05-06T00:00:00Z"
+				}
+			]
+		}
+	}
+}`)

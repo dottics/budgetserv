@@ -161,3 +161,94 @@ func TestService_CreateItem(t *testing.T) {
 		})
 	}
 }
+
+func TestService_UpdateItem(t *testing.T) {
+	tests := []struct {
+		name     string
+		payload  ItemUpdatePayload
+		exchange *microtest.Exchange
+		uri      string
+		item     Item
+		e        error
+	}{
+		{
+			name: "403 permission required",
+			payload: ItemUpdatePayload{
+				UUID:      uuid.MustParse("40355dba-0923-43a6-83d5-c9b6680edd2e"),
+				GroupUUID: uuid.MustParse("f71ce1d0-0ddd-4a39-9abd-baea8a6d8bbe"),
+				Name:      "test item",
+			},
+			exchange: &microtest.Exchange{
+				Response: microtest.Response{
+					Status: 403,
+					Body:   noPermission,
+				},
+			},
+			uri:  "/item/40355dba-0923-43a6-83d5-c9b6680edd2e",
+			item: Item{},
+			e:    errors.New("no permission"),
+		},
+		{
+			name: "404 item not found",
+			payload: ItemUpdatePayload{
+				UUID:      uuid.MustParse("f27ef50d-f10f-4ff8-b65a-d64b1ebb83c8"),
+				GroupUUID: uuid.MustParse("f71ce1d0-0ddd-4a39-9abd-baea8a6d8bbe"),
+				Name:      "test item",
+			},
+			exchange: &microtest.Exchange{
+				Response: microtest.Response{
+					Status: 404,
+					Body:   notFound,
+				},
+			},
+			uri:  "/item/f27ef50d-f10f-4ff8-b65a-d64b1ebb83c8",
+			item: Item{},
+			e:    errors.New("not found"),
+		},
+		{
+			name: "200 successful",
+			payload: ItemUpdatePayload{
+				UUID:      uuid.MustParse("f27ef50d-f10f-4ff8-b65a-d64b1ebb83c8"),
+				GroupUUID: uuid.MustParse("f71ce1d0-0ddd-4a39-9abd-baea8a6d8bbe"),
+				Name:      "test item",
+			},
+			exchange: &microtest.Exchange{
+				Response: microtest.Response{
+					Status: 200,
+					Body:   string(responseItem),
+				},
+			},
+			uri:  "/item/f27ef50d-f10f-4ff8-b65a-d64b1ebb83c8",
+			item: testItem,
+			e:    nil,
+		},
+	}
+
+	s := NewService(Config{})
+	ms := microtest.MockServer(s)
+	defer ms.Server.Close()
+
+	for i, tc := range tests {
+		name := fmt.Sprintf("%d %s", i, tc.name)
+		t.Run(name, func(t *testing.T) {
+			ms.Append(tc.exchange)
+
+			item, e := s.UpdateItem(tc.payload)
+
+			// ensure errors match as expected
+			if NotEqualError(e, tc.e) {
+				t.Errorf("expected error %v, got %v", tc.e, e)
+			}
+
+			// ensure items match as expected
+			if EqualItem(item, tc.item) == false {
+				t.Errorf("expected item\n%+v\ngot\n%+v", tc.item, item)
+			}
+
+			// ensure the correct uri was called
+			if tc.uri != tc.exchange.Request.RequestURI {
+				t.Errorf("expected uri %s, got %s", tc.uri, tc.exchange.Request.RequestURI)
+			}
+		})
+	}
+}
