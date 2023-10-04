@@ -5,6 +5,11 @@ The format is based on [Keep a changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+## [0.1.3] - 2023-10-04
+### Fixed
+- The `Group` payload structs to include a `GroupUUID` field to allow groups
+  to be nested.
+
 ## [0.1.2] - 2023-09-30
 ### Fixed
 - The `GetGroups` method to also return a standard error.
