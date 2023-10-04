@@ -30,6 +30,7 @@ type Budgets []Budget
 
 type GroupCreatePayload struct {
 	BudgetUUID  uuid.UUID `json:"budget_uuid"`
+	GroupUUID   uuid.UUID `json:"group_uuid"`
 	Name        string    `json:"name"`
 	Description string    `json:"description"`
 }
@@ -37,6 +38,7 @@ type GroupCreatePayload struct {
 type GroupUpdatePayload struct {
 	UUID        uuid.UUID `json:"uuid"`
 	BudgetUUID  uuid.UUID `json:"budget_uuid"`
+	GroupUUID   uuid.UUID `json:"group_uuid"`
 	Name        string    `json:"name"`
 	Description string    `json:"description"`
 }
