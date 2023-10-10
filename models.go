@@ -29,16 +29,16 @@ type Budget struct {
 type Budgets []Budget
 
 type GroupCreatePayload struct {
-	BudgetUUID  uuid.UUID `json:"budget_uuid"`
-	GroupUUID   uuid.UUID `json:"group_uuid"`
+	BudgetUUID  uuid.UUID `json:"budget_uuid,omitempty"`
+	GroupUUID   uuid.UUID `json:"group_uuid,omitempty"`
 	Name        string    `json:"name"`
 	Description string    `json:"description"`
 }
 
 type GroupUpdatePayload struct {
 	UUID        uuid.UUID `json:"uuid"`
-	BudgetUUID  uuid.UUID `json:"budget_uuid"`
-	GroupUUID   uuid.UUID `json:"group_uuid"`
+	BudgetUUID  uuid.UUID `json:"budget_uuid,omitempty"`
+	GroupUUID   uuid.UUID `json:"group_uuid,omitempty"`
 	Name        string    `json:"name"`
 	Description string    `json:"description"`
 }
@@ -56,18 +56,21 @@ type Groups []Group
 type ItemCreatePayload struct {
 	GroupUUID   uuid.UUID `json:"group_uuid"`
 	Name        string    `json:"name"`
+	Category    string    `json:"category"`
 	Description string    `json:"description"`
 }
 type ItemUpdatePayload struct {
 	UUID        uuid.UUID `json:"uuid"`
 	GroupUUID   uuid.UUID `json:"group_uuid"`
 	Name        string    `json:"name"`
+	Category    string    `json:"category"`
 	Description string    `json:"description"`
 }
 
 type Item struct {
 	UUID        uuid.UUID `json:"uuid"`
 	Name        string    `json:"name"`
+	Category    string    `json:"category"`
 	Description string    `json:"description"`
 	Events      Events    `json:"events"`
 }

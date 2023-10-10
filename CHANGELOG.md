@@ -5,6 +5,15 @@ The format is based on [Keep a changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+## [0.1.4] - 2023-10-10
+### Added
+- The `Item`'s `category` field.
+  - Allowing items to be categorised.
+
+### Updated
+- The `Group` and associated structs to omit the `GroupUUID` and `BudgetUUID`
+  fields when they are not present.
+
 ## [0.1.3] - 2023-10-04
 ### Fixed
 - The `Group` payload structs to include a `GroupUUID` field to allow groups
