@@ -53,24 +53,42 @@ type Group struct {
 
 type Groups []Group
 
-type ItemCreatePayload struct {
-	GroupUUID   uuid.UUID `json:"group_uuid"`
+type CategoryCreatePayload struct {
+	BudgetUUID  uuid.UUID `json:"budget_uuid"`
 	Name        string    `json:"name"`
-	Category    string    `json:"category"`
 	Description string    `json:"description"`
 }
-type ItemUpdatePayload struct {
+
+type CategoryUpdatePayload struct {
 	UUID        uuid.UUID `json:"uuid"`
-	GroupUUID   uuid.UUID `json:"group_uuid"`
 	Name        string    `json:"name"`
-	Category    string    `json:"category"`
 	Description string    `json:"description"`
+}
+
+type Category struct {
+	UUID        uuid.UUID `json:"uuid"`
+	Name        string    `json:"name"`
+	Description string    `json:"description"`
+}
+
+type ItemCreatePayload struct {
+	GroupUUID    uuid.UUID `json:"group_uuid"`
+	CategoryUUID uuid.UUID `json:"category_uuid"`
+	Name         string    `json:"name"`
+	Description  string    `json:"description"`
+}
+type ItemUpdatePayload struct {
+	UUID         uuid.UUID `json:"uuid"`
+	GroupUUID    uuid.UUID `json:"group_uuid"`
+	CategoryUUID uuid.UUID `json:"category_uuid"`
+	Name         string    `json:"name"`
+	Description  string    `json:"description"`
 }
 
 type Item struct {
 	UUID        uuid.UUID `json:"uuid"`
 	Name        string    `json:"name"`
-	Category    string    `json:"category"`
+	Category    Category  `json:"category"`
 	Description string    `json:"description"`
 	Events      Events    `json:"events"`
 }
@@ -207,6 +225,8 @@ func EqualItem(a, b Item) bool {
 	case a.Name != b.Name:
 		return false
 	case a.Description != b.Description:
+		return false
+	case a.Category != b.Category:
 		return false
 	default:
 		return true

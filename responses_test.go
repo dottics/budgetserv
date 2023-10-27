@@ -405,3 +405,51 @@ var responseItem = json.RawMessage(`{
 		}
 	}
 }`)
+
+var testCategories = []Category{
+	{
+		UUID:        uuid.MustParse("f5fca9d0-e308-4ff2-be4e-aff22a4c2a78"),
+		Name:        "test category",
+		Description: "test category description",
+	},
+	{
+		UUID:        uuid.MustParse("67b14c0f-b8ea-4f0f-bf07-cadc73cd74d9"),
+		Name:        "test category 2",
+		Description: "test category 2 description",
+	},
+}
+
+var responseCategories = json.RawMessage(`{
+	"message": "categories retrieved",
+	"data": {
+		"categories": [
+			{
+				"uuid": "f5fca9d0-e308-4ff2-be4e-aff22a4c2a78",
+				"name": "test category",
+				"description": "test category description"
+			},
+			{
+				"uuid": "67b14c0f-b8ea-4f0f-bf07-cadc73cd74d9",
+				"name": "test category 2",
+				"description": "test category 2 description"
+			}
+		]
+	}
+}`)
+
+var testCategory = Category{
+	UUID:        uuid.MustParse("f5fca9d0-e308-4ff2-be4e-aff22a4c2a78"),
+	Name:        "test category",
+	Description: "test category description",
+}
+
+var responseCategory = json.RawMessage(`{
+	"message": "category retrieved",
+	"data": {
+		"category": {
+			"uuid": "f5fca9d0-e308-4ff2-be4e-aff22a4c2a78",
+			"name": "test category",
+			"description": "test category description"
+		}
+	}
+}`)
