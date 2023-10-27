@@ -5,6 +5,18 @@ The format is based on [Keep a changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+## [0.1.5] - 2023-10-27
+### Added
+- The `Category` type to define the category of an item.
+- The `GetBudgetCategories` method to be able to get all categories.
+- The `CreateCategory` method to be able to create a new category.
+- The `UpdateCategory` method to be able to update a category.
+- The `DeleteCategory` method to be able to delete a category.
+
+### Updated
+- The `Item` type to include the `Category` field.
+  - And the methods to handle the new field.
+
 ## [0.1.4] - 2023-10-10
 ### Added
 - The `Item`'s `category` field.
