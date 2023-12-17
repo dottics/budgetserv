@@ -5,6 +5,13 @@ import (
 	"time"
 )
 
+type BudgetSetupPayload struct {
+	EntityUUID   uuid.UUID `json:"entity_uuid"`
+	BudgetName   string    `json:"budget_name"`
+	ItemName     string    `json:"item_name"`
+	CategoryName string    `json:"category_name"`
+}
+
 type BudgetCreatePayload struct {
 	EntityUUID  uuid.UUID `json:"entity_uuid"`
 	Name        string    `json:"name"`

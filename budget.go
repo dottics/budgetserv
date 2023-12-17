@@ -84,6 +84,34 @@ func (s *Service) GetBudget(UUID uuid.UUID) (Budget, error) {
 	return resp.Data.Budget, nil
 }
 
+// SetupBudget to setup a new budget for an entity.
+func (s *Service) SetupBudget(payload BudgetSetupPayload) (Budget, error) {
+	s.URL.Path = "/budget/setup"
+	p, err := marshalReader(payload)
+	if err != nil {
+		return Budget{}, nil
+	}
+
+	res, e := s.DoRequest("POST", s.URL, nil, nil, p)
+	if e != nil {
+		return Budget{}, nil
+	}
+
+	resp := struct {
+		Message string `json:"message"`
+		Data    struct {
+			Budget Budget `json:"budget"`
+		} `json:"data"`
+	}{}
+
+	err = marshalResponse(201, res, &resp)
+	if err != nil {
+		return Budget{}, err
+	}
+
+	return resp.Data.Budget, nil
+}
+
 // CreateBudget to create a new budget for an entity.
 func (s *Service) CreateBudget(budget BudgetCreatePayload) (Budget, error) {
 	s.URL.Path = "/budget/"
