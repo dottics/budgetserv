@@ -8,6 +8,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.2.0] - 2023-12-17
 
+### Added
+
+- The `SetupBudget` method to be able to set up a new budget with defaults:
+  - income group.
+  - expenses group.
+    - norm item and category where unclassified transactions are mapped to.
+    - subscriptions item and category. To show how to set up events.
+  - investments group.
+
 ### Updated
 
 - The `Item` and `Category` type and related payloads to reflect the migration
