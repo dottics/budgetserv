@@ -259,6 +259,155 @@ func TestService_CreateBudget(t *testing.T) {
 	}
 }
 
+func TestService_SetupBudget(t *testing.T) {
+	tests := []struct {
+		name         string
+		exchange     *microtest.Exchange
+		setupPayload BudgetSetupPayload
+		e            error
+		resBudget    Budget
+	}{
+		{
+			name: "403 permission required",
+			setupPayload: BudgetSetupPayload{
+				EntityUUID:   uuid.MustParse("8ace0389-f7a9-4e54-b4c8-83c2e88b1a23"),
+				BudgetName:   "budget name",
+				ItemName:     "the norm/default item",
+				CategoryName: "the norm/default category",
+			},
+			exchange: &microtest.Exchange{
+				Response: microtest.Response{
+					Status: 403,
+					Body:   noPermission,
+				},
+			},
+			resBudget: Budget{},
+			e:         errors.New("no permission"),
+		},
+		{
+			name: "200 successful",
+			setupPayload: BudgetSetupPayload{
+				EntityUUID:   uuid.MustParse("8ace0389-f7a9-4e54-b4c8-83c2e88b1a23"),
+				BudgetName:   "budget name",
+				ItemName:     "the norm/default item",
+				CategoryName: "other",
+			},
+			exchange: &microtest.Exchange{
+				Response: microtest.Response{
+					Status: 201,
+					Body: `{
+						"message": "budget created",
+						"data": {
+							"budget": {
+								"uuid": "4874ee6a-4d54-479e-9df8-418be1cb4fe0",
+								"entity_uuid": "8ace0389-f7a9-4e54-b4c8-83c2e88b1a23",
+								"name": "new budget",
+								"description": "new budget desc",
+								"groups": [
+									{
+										"uuid": "2af1fc78-b1d5-4dbc-b5ea-8ee2a1027c63",
+										"name": "income"
+									},
+									{
+										"uuid": "ad934dcb-a718-46e1-86c2-02c5853d5d6d",
+										"name": "expenses",
+										"items": [
+											{
+												"uuid": "aaffec58-b471-4c58-a130-3ecc0cc09e01",
+												"name": "the norm/default item",
+												"category": {
+													"uuid": "14ce5bed-bbba-4b9c-b98c-936a689b6d0f",
+													"name": "other",
+													"norm": true
+												}
+											},
+											{
+												"uuid": "755c93b4-f048-48fd-8a22-0d2ba66bf4c8",
+												"name": "subscriptions",
+												"category": {
+													"uuid": "32bfb1ec-d003-4b7b-9be8-3fb142ef1b93",
+													"name": "subscriptions",
+													"norm": false
+												}
+											}
+										]
+									},
+									{
+										"uuid": "20d63481-666d-4a31-8a74-aa99c2fcb685",
+										"name": "investments"
+									}
+								]
+						   }
+						}
+					}`,
+				},
+			},
+			resBudget: Budget{
+				EntityUUID:  uuid.MustParse("8ace0389-f7a9-4e54-b4c8-83c2e88b1a23"),
+				UUID:        uuid.MustParse("4874ee6a-4d54-479e-9df8-418be1cb4fe0"),
+				Name:        "new budget",
+				Description: "new budget desc",
+				Groups: Groups{
+					{
+						UUID: uuid.MustParse("2af1fc78-b1d5-4dbc-b5ea-8ee2a1027c63"),
+						Name: "income",
+					},
+					{
+						UUID: uuid.MustParse("ad934dcb-a718-46e1-86c2-02c5853d5d6d"),
+						Name: "expenses",
+						Items: Items{
+							{
+								UUID: uuid.MustParse("aaffec58-b471-4c58-a130-3ecc0cc09e01"),
+								Name: "the norm/default item",
+								Category: Category{
+									UUID: uuid.MustParse("14ce5bed-bbba-4b9c-b98c-936a689b6d0f"),
+									Name: "other",
+									Norm: true,
+								},
+							},
+							{
+								UUID: uuid.MustParse("755c93b4-f048-48fd-8a22-0d2ba66bf4c8"),
+								Name: "subscriptions",
+								Category: Category{
+									UUID: uuid.MustParse("32bfb1ec-d003-4b7b-9be8-3fb142ef1b93"),
+									Name: "subscriptions",
+									Norm: false,
+								},
+							},
+						},
+					},
+					{
+						UUID: uuid.MustParse("20d63481-666d-4a31-8a74-aa99c2fcb685"),
+						Name: "investments",
+					},
+				},
+			},
+			e: nil,
+		},
+	}
+
+	s := NewService(Config{})
+	ms := microtest.MockServer(s)
+	defer ms.Server.Close()
+
+	for i, tc := range tests {
+		name := fmt.Sprintf("%d %s", i, tc.name)
+		t.Run(name, func(t *testing.T) {
+			// add the service response to the mocked service
+			ms.Append(tc.exchange)
+
+			budget, err := s.SetupBudget(tc.setupPayload)
+			if NotEqualError(tc.e, err) {
+				t.Errorf("expected error '%v' got '%v'", tc.e, err)
+			}
+
+			if !EqualBudget(tc.resBudget, budget) {
+				t.Errorf("expected budget\n'%+v'\ngot\n'%+v'", tc.resBudget, budget)
+			}
+		})
+	}
+}
+
 func TestService_UpdateBudget(t *testing.T) {
 	tests := []struct {
 		name     string

@@ -85,6 +85,7 @@ func TestService_CreateCategory(t *testing.T) {
 			name: "403 Permission Required",
 			payload: CategoryCreatePayload{
 				BudgetUUID: uuid.MustParse("40355dba-0923-43a6-83d5-c9b6680edd2e"),
+				ItemUUID:   uuid.MustParse("8e9981a9-1225-4675-a43f-192e2da522df"),
 				Name:       "test category",
 			},
 			exchange: &microtest.Exchange{
@@ -101,6 +102,7 @@ func TestService_CreateCategory(t *testing.T) {
 			name: "200 Successful",
 			payload: CategoryCreatePayload{
 				BudgetUUID: uuid.MustParse("3df56eb1-b90f-4f1a-a734-9cc0e75f89ae"),
+				ItemUUID:   uuid.MustParse("4c0f2743-152f-4196-84c7-4139477990b8"),
 				Name:       "test category",
 			},
 			exchange: &microtest.Exchange{

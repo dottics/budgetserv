@@ -122,21 +122,25 @@ func (s *Service) UpdateGroup(payload GroupUpdatePayload) (Group, error) {
 // DeleteGroup deletes a specific group. The group is identified using the uuid
 // parameter. The methods also deletes all subgroups, items and events related
 // to the group.
-func (s *Service) DeleteGroup(UUID uuid.UUID) error {
+func (s *Service) DeleteGroup(UUID uuid.UUID) ([]Category, error) {
 	s.URL.Path = fmt.Sprintf("/group/%s", UUID.String())
 
 	res, e := s.DoRequest("DELETE", s.URL, nil, nil, nil)
 	if e != nil {
-		return e
+		return []Category{}, e
 	}
 
+	type data struct {
+		RemovedCategories []Category `json:"removed_categories"`
+	}
 	resp := struct {
 		Message string `json:"message"`
+		Data    data   `json:"data"`
 	}{}
 
 	err := marshalResponse(200, res, &resp)
 	if err != nil {
-		return err
+		return []Category{}, err
 	}
-	return nil
+	return resp.Data.RemovedCategories, err
 }

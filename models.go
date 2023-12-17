@@ -5,6 +5,13 @@ import (
 	"time"
 )
 
+type BudgetSetupPayload struct {
+	EntityUUID   uuid.UUID `json:"entity_uuid"`
+	BudgetName   string    `json:"budget_name"`
+	ItemName     string    `json:"item_name"`
+	CategoryName string    `json:"category_name"`
+}
+
 type BudgetCreatePayload struct {
 	EntityUUID  uuid.UUID `json:"entity_uuid"`
 	Name        string    `json:"name"`
@@ -55,6 +62,7 @@ type Groups []Group
 
 type CategoryCreatePayload struct {
 	BudgetUUID  uuid.UUID `json:"budget_uuid"`
+	ItemUUID    uuid.UUID `json:"item_uuid"`
 	Name        string    `json:"name"`
 	Description string    `json:"description"`
 }
@@ -69,20 +77,19 @@ type Category struct {
 	UUID        uuid.UUID `json:"uuid"`
 	Name        string    `json:"name"`
 	Description string    `json:"description"`
+	Norm        bool      `json:"norm"`
 }
 
 type ItemCreatePayload struct {
-	GroupUUID    uuid.UUID `json:"group_uuid"`
-	CategoryUUID uuid.UUID `json:"category_uuid"`
-	Name         string    `json:"name"`
-	Description  string    `json:"description"`
+	GroupUUID   uuid.UUID `json:"group_uuid"`
+	Name        string    `json:"name"`
+	Description string    `json:"description"`
 }
 type ItemUpdatePayload struct {
-	UUID         uuid.UUID `json:"uuid"`
-	GroupUUID    uuid.UUID `json:"group_uuid"`
-	CategoryUUID uuid.UUID `json:"category_uuid"`
-	Name         string    `json:"name"`
-	Description  string    `json:"description"`
+	UUID        uuid.UUID `json:"uuid"`
+	GroupUUID   uuid.UUID `json:"group_uuid"`
+	Name        string    `json:"name"`
+	Description string    `json:"description"`
 }
 
 type Item struct {

@@ -340,11 +340,12 @@ func TestService_UpdateGroup(t *testing.T) {
 
 func TestService_DeleteGroup(t *testing.T) {
 	tt := []struct {
-		name      string
-		groupUUID uuid.UUID
-		exchange  *microtest.Exchange
-		uri       string
-		e         error
+		name              string
+		groupUUID         uuid.UUID
+		exchange          *microtest.Exchange
+		uri               string
+		removedCategories []Category
+		e                 error
 	}{
 		{
 			name:      "403 Permission Required",
@@ -355,8 +356,9 @@ func TestService_DeleteGroup(t *testing.T) {
 					Body:   noPermission,
 				},
 			},
-			uri: "/group/52f2c725-2cdc-401a-abdd-66db5fd06789",
-			e:   errors.New("no permission"),
+			uri:               "/group/52f2c725-2cdc-401a-abdd-66db5fd06789",
+			removedCategories: []Category{},
+			e:                 errors.New("no permission"),
 		},
 		{
 			name:      "204 No Content",
@@ -364,11 +366,30 @@ func TestService_DeleteGroup(t *testing.T) {
 			exchange: &microtest.Exchange{
 				Response: microtest.Response{
 					Status: 200,
-					Body:   `{"message": "group deleted"}`,
+					Body: `{
+						"message": "group deleted",
+						"data": {
+							"removed_categories": [
+								{
+									"uuid": "f5fca9d0-e308-4ff2-be4e-aff22a4c2a78",
+									"name": "test category",
+									"description": "test category description",
+									"norm": false	
+								},
+								{
+									"uuid": "67b14c0f-b8ea-4f0f-bf07-cadc73cd74d9",
+									"name": "test category 2",
+									"description": "test category 2 description",
+									"norm": true
+								}
+							]
+						}
+					}`,
 				},
 			},
-			uri: "/group/52f2c725-2cdc-401a-abdd-66db5fd06789",
-			e:   nil,
+			uri:               "/group/52f2c725-2cdc-401a-abdd-66db5fd06789",
+			removedCategories: testCategories,
+			e:                 nil,
 		},
 	}
 
@@ -381,7 +402,7 @@ func TestService_DeleteGroup(t *testing.T) {
 			// add the budget-micro-service exchange
 			ms.Append(tc.exchange)
 
-			e := s.DeleteGroup(tc.groupUUID)
+			categories, e := s.DeleteGroup(tc.groupUUID)
 			// test the error response
 			if NotEqualError(tc.e, e) {
 				t.Errorf("expected error '%v' got '%v'", tc.e, e)
@@ -390,6 +411,16 @@ func TestService_DeleteGroup(t *testing.T) {
 			// test the exchange request URI
 			if tc.exchange.Request.RequestURI != tc.uri {
 				t.Errorf("expected uri '%v' got '%v'", tc.uri, tc.exchange.Request.RequestURI)
+			}
+
+			// test the categories structure returned
+			if len(categories) != len(tc.removedCategories) {
+				t.Errorf("expected categories to have length '%d' got '%d'", len(tc.removedCategories), len(categories))
+			}
+			for i, c := range tc.removedCategories {
+				if c != categories[i] {
+					t.Errorf("expected categories\n'%+v'\ngot\n'%+v'", c, categories[i])
+				}
 			}
 		})
 	}
