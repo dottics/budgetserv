@@ -411,11 +411,13 @@ var testCategories = []Category{
 		UUID:        uuid.MustParse("f5fca9d0-e308-4ff2-be4e-aff22a4c2a78"),
 		Name:        "test category",
 		Description: "test category description",
+		Norm:        false,
 	},
 	{
 		UUID:        uuid.MustParse("67b14c0f-b8ea-4f0f-bf07-cadc73cd74d9"),
 		Name:        "test category 2",
 		Description: "test category 2 description",
+		Norm:        true,
 	},
 }
 
@@ -426,12 +428,14 @@ var responseCategories = json.RawMessage(`{
 			{
 				"uuid": "f5fca9d0-e308-4ff2-be4e-aff22a4c2a78",
 				"name": "test category",
-				"description": "test category description"
+				"description": "test category description",
+				"norm": false
 			},
 			{
 				"uuid": "67b14c0f-b8ea-4f0f-bf07-cadc73cd74d9",
 				"name": "test category 2",
-				"description": "test category 2 description"
+				"description": "test category 2 description",
+				"norm": true
 			}
 		]
 	}
@@ -441,6 +445,7 @@ var testCategory = Category{
 	UUID:        uuid.MustParse("f5fca9d0-e308-4ff2-be4e-aff22a4c2a78"),
 	Name:        "test category",
 	Description: "test category description",
+	Norm:        false,
 }
 
 var responseCategory = json.RawMessage(`{
@@ -449,7 +454,8 @@ var responseCategory = json.RawMessage(`{
 		"category": {
 			"uuid": "f5fca9d0-e308-4ff2-be4e-aff22a4c2a78",
 			"name": "test category",
-			"description": "test category description"
+			"description": "test category description",
+			"norm": false
 		}
 	}
 }`)
