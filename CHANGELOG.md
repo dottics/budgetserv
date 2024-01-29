@@ -6,6 +6,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.1] - 2024-01-29
+
+### Updated
+
+- The `GetEntityBudget` method is now able to accept additional query parameters
+  to filter the returned budget.
+
 ## [0.2.0] - 2023-12-17
 
 ### Added

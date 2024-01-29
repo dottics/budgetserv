@@ -3,6 +3,7 @@ package budget
 import (
 	"fmt"
 	"github.com/google/uuid"
+	"net/url"
 )
 
 // GetBudgets retrieves all the budgets from the budget-microservice.
@@ -33,7 +34,7 @@ func (s *Service) GetBudgets() (Budgets, error) {
 
 // GetEntityBudgets retrieves all the budgets related to a specific entity. The
 // entity is identified using the uuid parameter.
-func (s *Service) GetEntityBudgets(EntityUUID uuid.UUID) (Budgets, error) {
+func (s *Service) GetEntityBudgets(EntityUUID uuid.UUID, query url.Values) (Budgets, error) {
 	s.URL.Path = fmt.Sprintf("/budget/entity/%s", EntityUUID.String())
 
 	type data struct {
@@ -45,7 +46,7 @@ func (s *Service) GetEntityBudgets(EntityUUID uuid.UUID) (Budgets, error) {
 		Data    data   `json:"data"`
 	}{}
 
-	res, e := s.DoRequest("GET", s.URL, nil, nil, nil)
+	res, e := s.DoRequest("GET", s.URL, query, nil, nil)
 	if e != nil {
 		return nil, e
 	}
